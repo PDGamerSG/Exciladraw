@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; }
+}
+
+@layer utilities {
+  .font-sketch { font-family: var(--font-caveat), cursive; }
+}
+
+/* SVG draw-in */
+.sketch-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease forwards;
+}
+.sketch-line-d1 { animation-delay: 0.4s; }
+.sketch-line-d2 { animation-delay: 0.8s; }
+.sketch-line-d3 { animation-delay: 1.2s; }
+.sketch-line-d4 { animation-delay: 1.6s; }
+
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.anim-fade-in  { animation: fadeIn  0.8s ease both; }
+.anim-fade-up  { animation: fadeUp  0.7s ease both; }
+.anim-float    { animation: float   4s ease-in-out infinite; }
+
+.d-100 { animation-delay: 0.1s; }
+.d-200 { animation-delay: 0.2s; }
+.d-300 { animation-delay: 0.3s; }
+.d-400 { animation-delay: 0.4s; }
+.d-500 { animation-delay: 0.5s; }
+.d-600 { animation-delay: 0.6s; }
+
+.grid-bg {
+  background-color: #f9fafb;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
