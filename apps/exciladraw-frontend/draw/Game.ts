@@ -83,6 +83,12 @@ export class Game{
                 this.ctx.stroke();
                 this.ctx.closePath();
             }
+            else if(shape.type === "pencil"){
+                this.ctx.beginPath();
+                this.ctx.moveTo(shape.startX,shape.startY);
+                this.ctx.lineTo(shape.endX,shape.endY);
+                this.ctx.stroke();
+            }
         })
     }
 
@@ -118,6 +124,17 @@ export class Game{
                 centerY: this.startY + radius
             }
         }
+        else if(selectedTool === "pencil"){
+            const endX = e.clientX;
+            const endY = e.clientY;
+            shape={
+                type:"pencil",
+                startX:this.startX,
+                startY:this.startY,
+                endX,
+                endY
+            }
+        }
         if(!shape){
             return;
         }
@@ -147,6 +164,14 @@ export class Game{
                 this.ctx.arc(centerX, centerY, Math.abs(radius), 0, Math.PI * 2);
                 this.ctx.stroke();
                 this.ctx.closePath();
+            }
+            else if(selectedTool === "pencil"){
+                const endX = e.clientX;
+                const endY = e.clientY;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.startX,this.startY);
+                this.ctx.lineTo(endX,endY);
+                this.ctx.stroke();
             }
         }
     }
