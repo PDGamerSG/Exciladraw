@@ -27,10 +27,10 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a href="#" className="text-sm text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
+          <a href="/signin" className="text-sm text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
             Sign in
           </a>
-          <Button href="#" variant="primary">Start Drawing</Button>
+          <Button href="/signup" variant="primary">Sign up</Button>
         </div>
       </div>
     </header>

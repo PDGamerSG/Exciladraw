@@ -18,6 +18,8 @@ type Shape={
     startY:number;
     endX:number;
     endY:number;
+}|{
+    type:"cursor"
 }
 export class Game{
     private canvas: HTMLCanvasElement;
@@ -28,6 +30,8 @@ export class Game{
     private startX = 0;
     private startY = 0;
     private selectedTool:Tool = "circle";
+    private previousX = 0;
+    private previousY = 0;
 
     socket:WebSocket;
 
@@ -41,14 +45,19 @@ export class Game{
         this.init();
         this.intiHandlers();
         this.initMouseHandlers();
+        // this.updatePanning();
+        // this.initPanning();
+
     }
     destroy(){
         this.canvas.removeEventListener("mousedown",this.mouseDownHandler)
         this.canvas.removeEventListener("mouseup",this.mouseUpHandler)
         this.canvas.removeEventListener("mousemove",this.mouseMoveHandler)
+        // this.canvas.removeEventListener("mousedown",this.pmouseDownHandler)
+        // this.canvas.removeEventListener("mousemove",this.updatePanning)
     }
 
-    setTool(tool:"circle" | "pencil" | "rect"){
+    setTool(tool:"circle" | "pencil" | "rect" | "cursor"){
         this.selectedTool = tool;
     }
 
@@ -88,6 +97,9 @@ export class Game{
                 this.ctx.moveTo(shape.startX,shape.startY);
                 this.ctx.lineTo(shape.endX,shape.endY);
                 this.ctx.stroke();
+            }
+            else if(shape.type === "cursor"){
+                this.initPanning();
             }
         })
     }
@@ -135,6 +147,9 @@ export class Game{
                 endY
             }
         }
+        else if(selectedTool === "cursor"){
+            this.initPanning(e);
+        }
         if(!shape){
             return;
         }
@@ -146,6 +161,7 @@ export class Game{
             }),
             roomId:this.roomId
         }))
+
     }
     mouseMoveHandler = (e) =>{
         if(this.clicked) {
@@ -173,11 +189,50 @@ export class Game{
                 this.ctx.lineTo(endX,endY);
                 this.ctx.stroke();
             }
+            else if(selectedTool === "cursor"){
+                this.initPanning();
+            }
         }
     }
     initMouseHandlers(e){
         this.canvas.addEventListener("mousedown",this.mouseDownHandler)
         this.canvas.addEventListener("mouseup",this.mouseUpHandler)
         this.canvas.addEventListener("mousemove",this.mouseMoveHandler)
-}
+    }
+    updatePanning =(e) =>{
+        const viewportTransform = {
+            x: 0,
+            y: 0,
+            scale: 1
+        }
+        const localX = e.clientX;
+        const localY = e.clientY;
+        viewportTransform.x += localX - this.previousX;
+        viewportTransform.y += localY - this.previousY;
+        this.previousX = localX;
+        this.previousY = localY;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0)
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        this.ctx.setTransform(
+            viewportTransform.scale,
+            0,
+            0,
+            viewportTransform.scale,
+            viewportTransform.x,
+            viewportTransform.y
+        )
+    }
+    pmouseDownHandler = (e)=>{
+        this.previousX = e.clientX
+        this.previousY = e.clientY
+        this.canvas.addEventListener('mousemove', this.updatePanning)
+    }
+    pmouseUpHandler =(e) =>{
+        this.clicked = false
+        this.canvas.removeEventListener('mousemove', this.updatePanning)
+    }
+    // initPanning(e){
+    //     this.canvas.addEventListener("mousedown",this.pmouseDownHandler)
+    //     this.canvas.addEventListener("mousemove",this.updatePanning)
+    // }
 }
