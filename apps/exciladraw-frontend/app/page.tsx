@@ -1,241 +1,233 @@
+import Link from "next/link";
 import {
-  Pencil,
-  Shapes,
-  Users,
-  Share2,
+  ArrowRight,
   Download,
   Lock,
-  Star,
-  ArrowRight,
+  Pencil,
+  Shapes,
+  Share2,
+  Sparkles,
+  Users,
   Zap,
-} from 'lucide-react';
-import Button from '@repo/ui/button';
-import FeatureCard from '@repo/ui/card';
-import Navbar from '@repo/ui/navbar';
-import SketchCanvas from '@repo/ui/canvas';
+} from "lucide-react";
+import { onest } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
 const FEATURES = [
   {
     icon: Pencil,
-    title: 'Freehand Drawing',
-    description: 'Natural strokes that feel like pen on paper — fluid, expressive, and precise.',
+    title: "freehand drawing",
+    description: "natural strokes that feel like pen on paper — fluid, expressive, precise.",
   },
   {
     icon: Shapes,
-    title: 'Smart Shapes',
-    description: 'Rough rectangles and circles auto-snap into clean geometry without losing character.',
+    title: "shapes & arrows",
+    description: "rectangles, diamonds, ellipses, arrows and lines. everything you need to diagram.",
   },
   {
     icon: Users,
-    title: 'Real-time Collaboration',
-    description: 'Share a link and see your teammates\' cursors and edits as they happen.',
+    title: "real-time collaboration",
+    description: "share a room and sketch together. every stroke syncs live over websockets.",
   },
   {
     icon: Share2,
-    title: 'One-Click Sharing',
-    description: 'Generate a public link or embed your diagram anywhere in seconds.',
+    title: "room based sharing",
+    description: "create a room, send the link, and your team is on the same canvas in seconds.",
   },
   {
-    icon: Download,
-    title: 'Export Anywhere',
-    description: 'Download as PNG, SVG, or the open .sketchpad format. Your work, your files.',
+    icon: Zap,
+    title: "fast by default",
+    description: "a lightweight canvas renderer keeps drawing smooth even on busy boards.",
   },
   {
     icon: Lock,
-    title: 'End-to-End Encrypted',
-    description: 'Private boards are encrypted client-side. Your ideas stay yours.',
+    title: "your boards, protected",
+    description: "rooms live behind your account. only people you invite can join in.",
   },
 ];
 
 const STEPS = [
   {
-    n: '1',
-    title: 'Open a board',
-    description: 'No account needed. Click "Start Drawing" and your canvas is ready immediately.',
+    n: "01",
+    title: "create your account",
+    description: "sign up in seconds — just a name, email and password.",
   },
   {
-    n: '2',
-    title: 'Invite your team',
-    description: 'Share the URL. Collaborators join instantly with live cursors and presence.',
+    n: "02",
+    title: "open a room",
+    description: "name a room and your infinite canvas is ready immediately.",
   },
   {
-    n: '3',
-    title: 'Export or embed',
-    description: 'Download PNG/SVG or drop an embed link into Notion, Linear, or your docs.',
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    quote: "We replaced three tools with Sketchpad. The real-time collaboration is indistinguishable from being in the same room.",
-    name: 'Sarah Chen',
-    role: 'Head of Design, Vercel',
-    avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-  },
-  {
-    quote: "Open source AND production-ready. I forked it Friday and had a custom internal deployment by Monday.",
-    name: 'Marcus Reid',
-    role: 'Engineering Manager, Stripe',
-    avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-  },
-  {
-    quote: "The infinite canvas just gets out of your way. It feels like thinking, not like using software.",
-    name: 'Priya Nair',
-    role: 'CTO, Luma Labs',
-    avatar: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
+    n: "03",
+    title: "sketch together",
+    description: "invite teammates to the room and watch ideas take shape live.",
   },
 ];
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <Navbar />
+    <div
+      className={cn(
+        onest.className,
+        "dark relative min-h-screen w-full overflow-hidden bg-background text-foreground"
+      )}
+    >
+      {/* ambient glow + grid */}
+      <div className="pointer-events-none absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,165,255,0.14),transparent_65%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:44px_44px]" />
 
-      {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-20 pb-24 px-6">
-        <div className="absolute inset-0 grid-bg pointer-events-none" />
-
-        <div className="relative max-w-5xl mx-auto">
-          {/* GitHub pill */}
-          <div className="flex justify-center mb-10 anim-fade-in">
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 text-xs font-medium text-gray-600 shadow-sm hover:shadow transition-shadow"
-            >
-              <Star size={12} className="text-yellow-400 fill-yellow-400" />
-              2,400+ stars on GitHub
-              <ArrowRight size={11} className="text-gray-400" />
-            </a>
-          </div>
-
-          {/* Headline */}
-          <div className="text-center max-w-3xl mx-auto mb-8">
-            <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-5 anim-fade-up">
-              The whiteboard that
-              <br />
-              <span className="font-sketch" style={{ fontSize: '1.1em', color: '#111827' }}>
-                thinks like you do.
-              </span>
-            </h1>
-            <p className="text-base text-gray-500 max-w-xl mx-auto leading-relaxed anim-fade-up d-200">
-              An open-source, end-to-end encrypted canvas for teams. No account, no friction — just draw.
-            </p>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-2.5 justify-center mb-16 anim-fade-up d-300">
-            <Button href="#" variant="primary" withArrow>
-              Open the Canvas
-            </Button>
-          </div>
-
-          {/* Canvas mockup */}
-          <div className="anim-fade-in d-400">
-            <SketchCanvas />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ──────────────────────────────────────────────────── */}
-      <section id="features" className="py-20 px-6 border-t border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Features</p>
-            <h2 className="text-2xl font-bold text-gray-900">Everything you need to think visually</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {FEATURES.map((f) => (
-              <FeatureCard key={f.title} {...f} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ──────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">How it works</p>
-            <h2 className="text-2xl font-bold text-gray-900">Up and running in 30 seconds</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {STEPS.map(({ n, title, description }) => (
-              <div key={n} className="relative">
-                <span className="font-sketch text-6xl font-bold text-gray-100 absolute -top-2 -right-1 select-none leading-none">
-                  {n}
-                </span>
-                <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-white text-xs font-bold">{n}</span>
-                </div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1.5">{title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ──────────────────────────────────────────────── */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2">Testimonials</p>
-            <h2 className="text-2xl font-bold text-gray-900">Trusted by builders</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4">
-            {TESTIMONIALS.map(({ quote, name, role, avatar }) => (
-              <div key={name} className="card-hover bg-white rounded-xl p-5 border border-gray-100">
-                <p className="text-sm text-gray-600 leading-relaxed mb-4">&ldquo;{quote}&rdquo;</p>
-                <div className="flex items-center gap-2.5">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={avatar} alt={name} className="w-8 h-8 rounded-full object-cover" />
-                  <div>
-                    <p className="text-xs font-semibold text-gray-900">{name}</p>
-                    <p className="text-xs text-gray-400">{role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gray-900">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-3">
-            Start with a blank canvas.
-          </h2>
-          <p className="text-gray-400 text-sm mb-8">
-            No download. No account. Open a board and draw right now.
-          </p>
-          <Button href="#" variant="outline" withArrow>
-            Open the Canvas
-          </Button>
-        </div>
-      </section>
-
-      {/* ── Footer ────────────────────────────────────────────────────── */}
-      <footer className="border-t border-gray-100 py-8 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-gray-900 rounded flex items-center justify-center">
-              <Pencil size={11} className="text-white" />
+      <div className="relative mx-auto w-full max-w-5xl px-4">
+        {/* nav */}
+        <header className="flex items-center justify-between py-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
+              <Pencil className="h-4 w-4 text-[#a8a5ff]" />
             </div>
-            <span className="text-sm font-semibold text-gray-900">Sketchpad</span>
-            <span className="text-gray-300 text-sm mx-2">·</span>
-            <span className="text-xs text-gray-400">Apache 2.0</span>
+            <span className="text-sm font-medium">exciladraw</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/signin"
+              className="inline-flex h-9 items-center rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
+            >
+              sign in
+            </Link>
+            <Link
+              href="/signup"
+              className="inline-flex h-9 items-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+            >
+              sign up
+            </Link>
+          </div>
+        </header>
+
+        {/* hero */}
+        <section className="flex flex-col items-center pb-20 pt-16 text-center sm:pt-24">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-foreground/5 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-md">
+            <Sparkles className="h-3 w-3 text-[#a8a5ff]" />
+            open-source collaborative whiteboard
           </div>
 
-          <div className="flex items-center gap-5">
-            {['Privacy', 'Terms'].map((item) => (
-              <a key={item} href="#" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                {item}
-              </a>
+          <h1 className="max-w-2xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
+            think out loud,
+            <br />
+            <span className="text-[#a8a5ff]">sketch it together.</span>
+          </h1>
+          <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+            a clean, fast whiteboard for teams. draw shapes, arrows and freehand
+            strokes on an infinite canvas — synced live with everyone in the room.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-2.5 sm:flex-row">
+            <Link
+              href="/signup"
+              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-5 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+            >
+              start sketching
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/signin"
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 px-5 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
+            >
+              open your rooms
+            </Link>
+          </div>
+
+          {/* canvas preview */}
+          <div className="mt-16 w-full rounded-2xl border border-primary/10 bg-foreground/5 p-2 backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-xl bg-[#121212]">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
+              <svg viewBox="0 0 800 380" className="relative w-full">
+                <rect x="90" y="90" width="180" height="110" rx="2" fill="none" stroke="#1971c2" strokeWidth="2" />
+                <text x="180" y="150" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">idea</text>
+                <path d="M275 145 C 330 145, 350 145, 400 145" fill="none" stroke="#d3d3d3" strokeWidth="2" />
+                <path d="M388 137 L 402 145 L 388 153" fill="none" stroke="#d3d3d3" strokeWidth="2" />
+                <path d="M485 90 L 570 145 L 485 200 L 400 145 Z" fill="none" stroke="#f08c00" strokeWidth="2" />
+                <text x="485" y="150" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">ship it?</text>
+                <path d="M570 145 C 620 145, 640 145, 680 145" fill="none" stroke="#d3d3d3" strokeWidth="2" />
+                <path d="M668 137 L 682 145 L 668 153" fill="none" stroke="#d3d3d3" strokeWidth="2" />
+                <ellipse cx="700" cy="260" rx="70" ry="45" fill="none" stroke="#2f9e44" strokeWidth="2" />
+                <text x="700" y="265" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">yes</text>
+                <path d="M120 280 C 180 240, 260 320, 330 270 S 430 250, 470 290" fill="none" stroke="#e03131" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        {/* features */}
+        <section className="pb-20">
+          <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">features</p>
+          <h2 className="mb-8 text-2xl font-semibold tracking-tight">
+            everything you need to think visually
+          </h2>
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map(({ icon: Icon, title, description }) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-primary/10 bg-foreground/5 p-5 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10"
+              >
+                <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5">
+                  <Icon className="h-4 w-4 text-[#a8a5ff]" />
+                </div>
+                <h3 className="mb-1.5 text-sm font-medium">{title}</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
+              </div>
             ))}
           </div>
-        </div>
-      </footer>
+        </section>
+
+        {/* how it works */}
+        <section className="pb-20">
+          <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">how it works</p>
+          <h2 className="mb-8 text-2xl font-semibold tracking-tight">up and running in seconds</h2>
+          <div className="grid gap-2.5 md:grid-cols-3">
+            {STEPS.map(({ n, title, description }) => (
+              <div
+                key={n}
+                className="rounded-2xl border border-primary/10 bg-foreground/5 p-5 backdrop-blur-md"
+              >
+                <span className="text-xs font-medium text-[#a8a5ff]">{n}</span>
+                <h3 className="mb-1.5 mt-3 text-sm font-medium">{title}</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* cta */}
+        <section className="pb-20">
+          <div className="flex flex-col items-center gap-5 rounded-2xl border border-primary/10 bg-foreground/5 px-6 py-14 text-center backdrop-blur-md">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              start with a blank canvas.
+            </h2>
+            <p className="max-w-sm text-sm text-muted-foreground">
+              create an account, open a room, and draw with your team right now.
+            </p>
+            <Link
+              href="/signup"
+              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-5 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+            >
+              get started — it&apos;s free
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        </section>
+
+        {/* footer */}
+        <footer className="flex flex-col items-center justify-between gap-4 border-t border-primary/10 py-8 sm:flex-row">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/10 bg-foreground/5">
+              <Pencil className="h-3.5 w-3.5 text-[#a8a5ff]" />
+            </div>
+            <span className="text-sm font-medium">exciladraw</span>
+          </div>
+          <div className="flex items-center gap-5 text-xs text-muted-foreground">
+            <Download className="hidden h-3.5 w-3.5 sm:block" />
+            <span>open source · built for teams</span>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
