@@ -132,6 +132,12 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                         {isSignin ? "sign in" : "sign up"}
                     </button>
+
+                    {!isSignin && (
+                        <p className="text-center text-xs text-muted-foreground">
+                            by signing up you agree to our terms & privacy policy
+                        </p>
+                    )}
                 </form>
 
                 <p className="mt-6 text-center text-sm text-muted-foreground">
