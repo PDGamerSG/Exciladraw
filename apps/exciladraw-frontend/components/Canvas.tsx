@@ -1,67 +1,122 @@
-import { initDraw } from "@/draw";
-import { useEffect, useRef, useState } from "react";
-import { IconButton } from "./IconButton";
-import { Circle, Pencil, RectangleHorizontalIcon, Shapes, TextCursor } from "lucide-react";
-import { Game } from "@/draw/Game";
+"use client";
 
-export type Tool = "circle"|"rect"|"pencil"|"cursor";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Game } from "@/draw/Game";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toolbar } from "./canvas/Toolbar";
+import { MainMenu } from "./canvas/MainMenu";
+import { PanelState } from "./canvas/PropertiesPanel";
+
+export type Tool =
+    | "select"
+    | "rect"
+    | "diamond"
+    | "ellipse"
+    | "arrow"
+    | "line"
+    | "pencil";
+
+const KEY_TO_TOOL: Record<string, Tool> = {
+    v: "select", "1": "select",
+    r: "rect", "2": "rect",
+    d: "diamond", "3": "diamond",
+    o: "ellipse", "4": "ellipse",
+    a: "arrow", "5": "arrow",
+    l: "line", "6": "line",
+    p: "pencil", "7": "pencil"
+};
+
+const CURSOR_FOR_TOOL: Record<string, string> = {
+    select: "default"
+};
+
 export function Canvas({
     roomId,
     socket
-}:{
-    roomId:string;
-    socket: WebSocket
-}){
-
+}: {
+    roomId: string;
+    socket: WebSocket;
+}) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [game,setGame] = useState<Game>();
-    const [selectedTool, setSelectedTool] = useState<Tool>("circle");
-    useEffect(() =>{
+    const [game, setGame] = useState<Game>();
+    const [selectedTool, setSelectedTool] = useState<Tool>("select");
+    const [dimensions, setDimensions] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight
+    });
+    const [panelState, setPanelState] = useState<PanelState>({
+        strokeColor: "#d3d3d3",
+        fillColor: "transparent",
+        strokeWidth: 1,
+        strokeStyle: "solid",
+        edges: "sharp",
+        opacity: 100
+    });
+
+    const updatePanelState = useCallback((patch: Partial<PanelState>) => {
+        setPanelState((prev) => ({ ...prev, ...patch }));
+    }, []);
+
+    useEffect(() => {
         game?.setTool(selectedTool);
-        // window.selectedTool = selectedTool;
-    },[selectedTool,game]);
+    }, [selectedTool, game]);
 
-    useEffect(()=>{
-        if(canvasRef.current){
-            const g = new Game(canvasRef.current,roomId,socket);
+    useEffect(() => {
+        game?.setStyle(panelState);
+    }, [panelState, game]);
+
+    useEffect(() => {
+        if (canvasRef.current) {
+            const g = new Game(canvasRef.current, roomId, socket);
             setGame(g);
-            // initDraw(canvasRef.current,roomId,socket);
-            return () =>{
+            return () => {
                 g.destroy();
-            }
-;        }
-    },[canvasRef])
-    return <div style={{
-        height:"100vh",
-        overflow: "hidden"
-    }}>
-        <canvas ref={canvasRef} width={window.innerWidth} height={window.innerHeight} ></canvas>
-        <Topbar setSelectedTool={setSelectedTool} selectedTool={selectedTool} />
-    </div>
-}
+            };
+        }
+    }, [canvasRef]);
 
-function Topbar({selectedTool,setSelectedTool}:{
-    selectedTool:Tool,
-    setSelectedTool: (s:Tool) => void
-}){
-    return <div style={{
-            position:"fixed",
-            top:10,
-            left:10
-        }}>
-            <div className="flex gap-t">
-                <IconButton onClick={() => {
-                    setSelectedTool("pencil")
-                }} activated={selectedTool === "pencil"} icon={<Pencil />} ></IconButton>
-                <IconButton onClick={() => {
-                    setSelectedTool("rect")
-                }} activated={selectedTool === "rect"} icon={<RectangleHorizontalIcon />} ></IconButton>
-                <IconButton onClick={() => {
-                    setSelectedTool("circle")
-                }} activated={selectedTool === "circle"} icon={<Circle />}></IconButton>
-                <IconButton onClick={() => {
-                    setSelectedTool("cursor")
-                }} activated={selectedTool === "cursor"} icon={<TextCursor />}></IconButton>
+    useEffect(() => {
+        const onResize = () => {
+            setDimensions({ width: window.innerWidth, height: window.innerHeight });
+            requestAnimationFrame(() => game?.resize());
+        };
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, [game]);
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            const target = e.target as HTMLElement;
+            if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+            const tool = KEY_TO_TOOL[e.key.toLowerCase()];
+            if (tool) setSelectedTool(tool);
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, []);
+
+    return (
+        <TooltipProvider delayDuration={300}>
+            <div className="dark relative h-screen w-screen overflow-hidden bg-[#121212]">
+                <canvas
+                    ref={canvasRef}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    style={{ cursor: CURSOR_FOR_TOOL[selectedTool] ?? "crosshair" }}
+                />
+
+                {/* Top bar */}
+                <div className="pointer-events-none fixed inset-x-4 top-4 flex items-start justify-between">
+                    <MainMenu panelState={panelState} setPanelState={updatePanelState} />
+                    <Toolbar
+                        selectedTool={selectedTool}
+                        setSelectedTool={setSelectedTool}
+                    />
+                    {/* spacer to keep the toolbar centered */}
+                    <div className="w-9" />
+                </div>
             </div>
-        </div>
+        </TooltipProvider>
+    );
 }
