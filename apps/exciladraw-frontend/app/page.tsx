@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Download,
   Lock,
   Pencil,
   Shapes,
@@ -76,25 +75,25 @@ export default function Page() {
       <div className="pointer-events-none absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,165,255,0.14),transparent_65%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:44px_44px]" />
 
-      <div className="relative mx-auto w-full max-w-5xl px-4">
+      <div className="relative mx-auto w-full max-w-5xl px-6 lg:px-8">
         {/* nav */}
-        <header className="flex items-center justify-between py-6">
-          <div className="flex items-center gap-2.5">
+        <header className="flex h-20 items-center justify-between">
+          <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
               <Pencil className="h-4 w-4 text-[#a8a5ff]" />
             </div>
             <span className="text-sm font-medium">exciladraw</span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <Link
               href="/signin"
-              className="inline-flex h-9 items-center rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
+              className="inline-flex h-10 items-center rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
             >
               sign in
             </Link>
             <Link
               href="/signup"
-              className="inline-flex h-9 items-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+              className="inline-flex h-10 items-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
             >
               sign up
             </Link>
@@ -102,40 +101,40 @@ export default function Page() {
         </header>
 
         {/* hero */}
-        <section className="flex flex-col items-center pb-20 pt-16 text-center sm:pt-24">
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-primary/10 bg-foreground/5 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-md">
+        <section className="flex flex-col items-center pb-24 pt-16 text-center sm:pb-32 sm:pt-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-foreground/5 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-md">
             <Sparkles className="h-3 w-3 text-[#a8a5ff]" />
             open-source collaborative whiteboard
           </div>
 
-          <h1 className="max-w-2xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
+          <h1 className="mt-8 max-w-2xl text-4xl font-semibold leading-[1.15] tracking-tight sm:text-6xl sm:leading-[1.1]">
             think out loud,
             <br />
             <span className="text-[#a8a5ff]">sketch it together.</span>
           </h1>
-          <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
             a clean, fast whiteboard for teams. draw shapes, arrows and freehand
             strokes on an infinite canvas — synced live with everyone in the room.
           </p>
 
-          <div className="mt-8 flex flex-col gap-2.5 sm:flex-row">
+          <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
             <Link
               href="/signup"
-              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-5 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+              className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85 sm:w-auto"
             >
               start sketching
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/signin"
-              className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 px-5 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 px-6 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground sm:w-auto"
             >
               open your rooms
             </Link>
           </div>
 
           {/* canvas preview */}
-          <div className="mt-16 w-full rounded-2xl border border-primary/10 bg-foreground/5 p-2 backdrop-blur-md">
+          <div className="mt-20 w-full rounded-2xl border border-primary/10 bg-foreground/5 p-2 backdrop-blur-md sm:p-2.5">
             <div className="relative overflow-hidden rounded-xl bg-[#121212]">
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
               <svg viewBox="0 0 800 380" className="relative w-full">
@@ -156,57 +155,67 @@ export default function Page() {
         </section>
 
         {/* features */}
-        <section className="pb-20">
-          <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">features</p>
-          <h2 className="mb-8 text-2xl font-semibold tracking-tight">
-            everything you need to think visually
-          </h2>
-          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="border-t border-primary/10 py-20 sm:py-24">
+          <div className="mb-12">
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              features
+            </p>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              everything you need to think visually
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map(({ icon: Icon, title, description }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-primary/10 bg-foreground/5 p-5 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10"
+                className="rounded-2xl border border-primary/10 bg-foreground/5 p-6 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10"
               >
-                <div className="mb-3.5 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5">
                   <Icon className="h-4 w-4 text-[#a8a5ff]" />
                 </div>
-                <h3 className="mb-1.5 text-sm font-medium">{title}</h3>
-                <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
+                <h3 className="mb-2 text-sm font-medium">{title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* how it works */}
-        <section className="pb-20">
-          <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">how it works</p>
-          <h2 className="mb-8 text-2xl font-semibold tracking-tight">up and running in seconds</h2>
-          <div className="grid gap-2.5 md:grid-cols-3">
+        <section className="border-t border-primary/10 py-20 sm:py-24">
+          <div className="mb-12">
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              how it works
+            </p>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              up and running in seconds
+            </h2>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
             {STEPS.map(({ n, title, description }) => (
               <div
                 key={n}
-                className="rounded-2xl border border-primary/10 bg-foreground/5 p-5 backdrop-blur-md"
+                className="rounded-2xl border border-primary/10 bg-foreground/5 p-6 backdrop-blur-md"
               >
                 <span className="text-xs font-medium text-[#a8a5ff]">{n}</span>
-                <h3 className="mb-1.5 mt-3 text-sm font-medium">{title}</h3>
-                <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
+                <h3 className="mb-2 mt-4 text-sm font-medium">{title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* cta */}
-        <section className="pb-20">
-          <div className="flex flex-col items-center gap-5 rounded-2xl border border-primary/10 bg-foreground/5 px-6 py-14 text-center backdrop-blur-md">
+        <section className="border-t border-primary/10 py-20 sm:py-24">
+          <div className="flex flex-col items-center gap-6 rounded-2xl border border-primary/10 bg-foreground/5 px-6 py-16 text-center backdrop-blur-md sm:py-20">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               start with a blank canvas.
             </h2>
-            <p className="max-w-sm text-sm text-muted-foreground">
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               create an account, open a room, and draw with your team right now.
             </p>
             <Link
               href="/signup"
-              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-5 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
+              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-6 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
             >
               get started — it&apos;s free
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -215,17 +224,14 @@ export default function Page() {
         </section>
 
         {/* footer */}
-        <footer className="flex flex-col items-center justify-between gap-4 border-t border-primary/10 py-8 sm:flex-row">
-          <div className="flex items-center gap-2.5">
+        <footer className="flex flex-col items-center justify-between gap-4 border-t border-primary/10 py-10 sm:flex-row">
+          <div className="flex items-center gap-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/10 bg-foreground/5">
               <Pencil className="h-3.5 w-3.5 text-[#a8a5ff]" />
             </div>
             <span className="text-sm font-medium">exciladraw</span>
           </div>
-          <div className="flex items-center gap-5 text-xs text-muted-foreground">
-            <Download className="hidden h-3.5 w-3.5 sm:block" />
-            <span>open source · built for teams</span>
-          </div>
+          <span className="text-xs text-muted-foreground">open source · built for teams</span>
         </footer>
       </div>
     </div>
