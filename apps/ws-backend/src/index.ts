@@ -2,8 +2,21 @@ import { WebSocket, WebSocketServer } from 'ws';
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
 import { prismaClient } from "@repo/db/client";
+import http from "http";
 
-const wss = new WebSocketServer({ port: Number(process.env.PORT) || 8080 });
+const server = http.createServer((req, res) => {
+  if (req.url === "/health" || req.url === "/") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
+
+const wss = new WebSocketServer({ server });
+
+server.listen(Number(process.env.PORT) || 8080);
 
 interface User {
   ws: WebSocket,

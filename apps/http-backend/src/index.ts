@@ -10,6 +10,9 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
+})
 app.post("/signup",async (req,res) =>{
     const parsedData = CreateUserSchema.safeParse(req.body);
     if(!parsedData.success){
