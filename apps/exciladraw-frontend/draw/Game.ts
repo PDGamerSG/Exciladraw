@@ -65,6 +65,7 @@ export class Game {
     private currentPoints: { x: number; y: number }[] = [];
     private selectedTool: Tool = "select";
     private style: ShapeStyle = { ...DEFAULT_STYLE };
+    private destroyed = false;
 
     socket: WebSocket;
 
@@ -81,9 +82,13 @@ export class Game {
     }
 
     destroy() {
+        this.destroyed = true;
         this.canvas.removeEventListener("mousedown", this.mouseDownHandler);
-        this.canvas.removeEventListener("mouseup", this.mouseUpHandler);
+        window.removeEventListener("mouseup", this.mouseUpHandler);
         this.canvas.removeEventListener("mousemove", this.mouseMoveHandler);
+        if (this.socket.onmessage === this.socketMessageHandler) {
+            this.socket.onmessage = null;
+        }
     }
 
     setTool(tool: Tool) {
@@ -99,20 +104,32 @@ export class Game {
     }
 
     async init() {
-        this.existingShapes = await getExistingShapes(this.roomId);
-        this.clearCanvas();
+        try {
+            const shapes = await getExistingShapes(this.roomId);
+            if (this.destroyed) return;
+            this.existingShapes = shapes;
+        } catch (e) {
+            console.error("could not load the existing shapes for this room", e);
+        }
+        if (!this.destroyed) this.clearCanvas();
     }
 
-    initSocketHandlers() {
-        this.socket.onmessage = (event) => {
+    private socketMessageHandler = (event: MessageEvent) => {
+        try {
             const message = JSON.parse(event.data);
+            if (message.type !== "chat") return;
 
-            if (message.type == "chat") {
-                const parsedShape = JSON.parse(message.message);
-                this.existingShapes.push(parsedShape.shape);
-                this.clearCanvas();
-            }
-        };
+            const parsedShape = JSON.parse(message.message);
+            if (!parsedShape?.shape) return;
+            this.existingShapes.push(parsedShape.shape);
+            this.clearCanvas();
+        } catch (e) {
+            console.error("ignoring a malformed message from the server", e);
+        }
+    };
+
+    initSocketHandlers() {
+        this.socket.onmessage = this.socketMessageHandler;
     }
 
     private applyStyle(style: ShapeStyle) {
@@ -204,11 +221,12 @@ export class Game {
             if (!points.length && legacy.startX !== undefined) {
                 points.push({ x: legacy.startX, y: legacy.startY }, { x: legacy.endX, y: legacy.endY });
             }
-            if (points.length < 2) return;
+            const [first, ...rest] = points;
+            if (!first || !rest.length) return;
             this.ctx.beginPath();
-            this.ctx.moveTo(points[0].x, points[0].y);
-            for (let i = 1; i < points.length; i++) {
-                this.ctx.lineTo(points[i].x, points[i].y);
+            this.ctx.moveTo(first.x, first.y);
+            for (const point of rest) {
+                this.ctx.lineTo(point.x, point.y);
             }
             this.ctx.stroke();
         }
@@ -298,6 +316,7 @@ export class Game {
 
         this.existingShapes.push(shape);
         this.clearCanvas();
+        if (this.socket.readyState !== WebSocket.OPEN) return;
         this.socket.send(JSON.stringify({
             type: "chat",
             message: JSON.stringify({ shape }),
@@ -319,7 +338,9 @@ export class Game {
 
     initMouseHandlers() {
         this.canvas.addEventListener("mousedown", this.mouseDownHandler);
-        this.canvas.addEventListener("mouseup", this.mouseUpHandler);
+        // on window, so a drag that ends outside the canvas still commits the
+        // shape instead of leaving the game stuck in the "drawing" state
+        window.addEventListener("mouseup", this.mouseUpHandler);
         this.canvas.addEventListener("mousemove", this.mouseMoveHandler);
     }
 }

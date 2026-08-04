@@ -41,10 +41,7 @@ export function Canvas({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [game, setGame] = useState<Game>();
     const [selectedTool, setSelectedTool] = useState<Tool>("select");
-    const [dimensions, setDimensions] = useState({
-        width: window.innerWidth,
-        height: window.innerHeight
-    });
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [panelState, setPanelState] = useState<PanelState>({
         strokeColor: "#d3d3d3",
         fillColor: "transparent",
@@ -67,23 +64,27 @@ export function Canvas({
     }, [panelState, game]);
 
     useEffect(() => {
-        if (canvasRef.current) {
-            const g = new Game(canvasRef.current, roomId, socket);
-            setGame(g);
-            return () => {
-                g.destroy();
-            };
-        }
-    }, [canvasRef]);
+        if (!canvasRef.current) return;
+        const g = new Game(canvasRef.current, roomId, socket);
+        setGame(g);
+        return () => {
+            g.destroy();
+        };
+    }, [roomId, socket]);
 
     useEffect(() => {
-        const onResize = () => {
+        const onResize = () =>
             setDimensions({ width: window.innerWidth, height: window.innerHeight });
-            requestAnimationFrame(() => game?.resize());
-        };
+        onResize();
         window.addEventListener("resize", onResize);
         return () => window.removeEventListener("resize", onResize);
-    }, [game]);
+    }, []);
+
+    // resizing a canvas element wipes its contents, so redraw once the new
+    // width/height have been committed to the DOM
+    useEffect(() => {
+        game?.resize();
+    }, [dimensions, game]);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
