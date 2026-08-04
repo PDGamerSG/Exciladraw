@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const caveat = Caveat({ subsets: ['latin'], weight: ['500', '700'], variable: '--font-caveat' });
 
 export const metadata: Metadata = {
-  title: 'Sketchpad — The Open Drawing Canvas',
-  description: 'An open-source, end-to-end encrypted whiteboard for teams.',
+  title: 'Exciladraw — the open drawing canvas',
+  description: 'An open-source, real-time collaborative whiteboard for teams.',
   twitter: { card: 'summary_large_image' },
 };
 

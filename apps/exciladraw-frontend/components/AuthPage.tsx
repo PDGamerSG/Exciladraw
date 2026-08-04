@@ -63,9 +63,12 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
             <div className="relative w-full max-w-sm">
                 {/* brand */}
                 <div className="mb-8 flex flex-col items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
-                        <Pencil className="h-5 w-5 text-[#a8a5ff]" />
-                    </div>
+                    <Link href="/" className="flex items-center gap-2.5">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
+                            <Pencil className="h-5 w-5 text-[#a8a5ff]" />
+                        </div>
+                        <span className="text-sm font-medium">exciladraw</span>
+                    </Link>
                     <div className="text-center">
                         <h1 className="text-2xl font-semibold tracking-tight">
                             {isSignin ? "welcome back" : "create your account"}

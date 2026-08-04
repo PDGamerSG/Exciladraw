@@ -11,7 +11,7 @@ export default function Navbar() {
           <div className="w-7 h-7 bg-gray-900 rounded-md flex items-center justify-center">
             <Pencil size={13} className="text-white" />
           </div>
-          <span className="font-semibold text-gray-900">Sketchpad</span>
+          <span className="font-semibold text-gray-900">Exciladraw</span>
         </a>
 
         <nav className="hidden sm:flex items-center gap-6">
