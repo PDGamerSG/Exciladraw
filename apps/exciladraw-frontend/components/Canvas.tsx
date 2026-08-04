@@ -5,6 +5,7 @@ import { Game } from "@/draw/Game";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toolbar } from "./canvas/Toolbar";
 import { MainMenu } from "./canvas/MainMenu";
+import { BackButton } from "./canvas/BackButton";
 import { PanelState } from "./canvas/PropertiesPanel";
 
 export type Tool =
@@ -108,13 +109,16 @@ export function Canvas({
 
                 {/* Top bar */}
                 <div className="pointer-events-none fixed inset-x-4 top-4 flex items-start justify-between">
-                    <MainMenu panelState={panelState} setPanelState={updatePanelState} />
+                    <div className="flex items-center gap-2">
+                        <BackButton />
+                        <MainMenu panelState={panelState} setPanelState={updatePanelState} />
+                    </div>
                     <Toolbar
                         selectedTool={selectedTool}
                         setSelectedTool={setSelectedTool}
                     />
-                    {/* spacer to keep the toolbar centered */}
-                    <div className="w-9" />
+                    {/* spacer matching the controls on the left, to keep the toolbar centered */}
+                    <div className="w-20" />
                 </div>
             </div>
         </TooltipProvider>
