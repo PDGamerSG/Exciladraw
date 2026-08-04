@@ -54,6 +54,16 @@ type Shape = ({
     points: { x: number; y: number }[];
 }) & { style?: ShapeStyle };
 
+// fields written by older versions of the app that may still be sitting in the
+// database: circles stored a single radius, and pencil strokes a lone segment
+type LegacyShapeFields = {
+    radius?: number;
+    startX?: number;
+    startY?: number;
+    endX?: number;
+    endY?: number;
+};
+
 export class Game {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
@@ -156,6 +166,7 @@ export class Game {
 
     private drawShape(shape: Shape) {
         const style = { ...DEFAULT_STYLE, ...(shape.style ?? {}) };
+        const legacy = shape as LegacyShapeFields;
         this.applyStyle(style);
 
         if (shape.type === "rect") {
@@ -183,8 +194,8 @@ export class Game {
             this.ctx.ellipse(
                 shape.centerX,
                 shape.centerY,
-                Math.abs(shape.radiusX ?? (shape as any).radius ?? 0),
-                Math.abs(shape.radiusY ?? (shape as any).radius ?? 0),
+                Math.abs(shape.radiusX ?? legacy.radius ?? 0),
+                Math.abs(shape.radiusY ?? legacy.radius ?? 0),
                 0, 0, Math.PI * 2
             );
             this.fillIfNeeded(style);
@@ -215,11 +226,12 @@ export class Game {
             );
             this.ctx.stroke();
         } else if (shape.type === "pencil") {
-            const points = shape.points ?? [];
-            // older messages stored a single segment
-            const legacy = shape as any;
+            let points = shape.points ?? [];
             if (!points.length && legacy.startX !== undefined) {
-                points.push({ x: legacy.startX, y: legacy.startY }, { x: legacy.endX, y: legacy.endY });
+                points = [
+                    { x: legacy.startX, y: legacy.startY ?? 0 },
+                    { x: legacy.endX ?? 0, y: legacy.endY ?? 0 }
+                ];
             }
             const [first, ...rest] = points;
             if (!first || !rest.length) return;

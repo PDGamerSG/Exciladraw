@@ -32,10 +32,11 @@ export default function RoomPage() {
         axios
             .get(`${HTTP_BACKEND}/room`, { headers: { Authorization: token } })
             .then((res) => setRooms(res.data.rooms ?? []))
-            .catch((err) => {
+            .catch((err: unknown) => {
                 // an expired or rejected token should send you back to sign in
                 // rather than leaving you on an empty rooms list
-                if (err?.response?.status === 401 || err?.response?.status === 403) {
+                const status = axios.isAxiosError(err) ? err.response?.status : undefined;
+                if (status === 401 || status === 403) {
                     localStorage.removeItem("token");
                     router.push("/signin");
                     return;
@@ -58,8 +59,11 @@ export default function RoomPage() {
                 { headers: { Authorization: token } }
             );
             router.push(`/canvas/${res.data.roomId}`);
-        } catch (err: any) {
-            setError(err?.response?.data?.message ?? "could not create the room. try another name.");
+        } catch (err) {
+            const message = axios.isAxiosError(err)
+                ? err.response?.data?.message
+                : undefined;
+            setError(message ?? "could not create the room. try another name.");
             setCreating(false);
         }
     }

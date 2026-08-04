@@ -39,9 +39,12 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                 });
                 router.push("/signin");
             }
-        } catch (err: any) {
+        } catch (err) {
+            const message = axios.isAxiosError(err)
+                ? err.response?.data?.message
+                : undefined;
             setError(
-                err?.response?.data?.message ??
+                message ??
                     (isSignin ? "could not sign you in. check your details." : "could not create your account. try again.")
             );
         } finally {
