@@ -16,7 +16,7 @@ app.get("/health", (req, res) => {
 app.post("/signup",async (req,res) =>{
     const parsedData = CreateUserSchema.safeParse(req.body);
     if(!parsedData.success){
-        res.json({
+        res.status(400).json({
             message:"Incorrect inputs"
         })
         return;
@@ -44,7 +44,7 @@ app.post("/signup",async (req,res) =>{
 app.post("/signin",async (req,res) =>{
     const parsedData = SigninSchema.safeParse(req.body);
     if(!parsedData.success){
-        res.json({
+        res.status(400).json({
             message:"Incorrect inputs"
         })
         return;
@@ -75,7 +75,7 @@ app.post("/signin",async (req,res) =>{
 app.post("/room",middleware,async (req,res) =>{
     const parsedData = CreateRoomSchema.safeParse(req.body);
     if(!parsedData.success){
-        res.json({
+        res.status(400).json({
             message:"Incorrect inputs"
         })
         return;
@@ -100,9 +100,15 @@ app.post("/room",middleware,async (req,res) =>{
     }
 })
 
-app.get("/chats/:roomId",async (req,res) => {
+app.get("/chats/:roomId",middleware,async (req,res) => {
+    const roomId = Number(req.params.roomId);
+    if(!Number.isInteger(roomId)){
+        res.status(400).json({
+            message:"Invalid room id"
+        })
+        return;
+    }
     try{
-        const roomId = Number(req.params.roomId);
         const messages = await prismaClient.chat.findMany({
             where:{
                 roomId: roomId
@@ -112,24 +118,32 @@ app.get("/chats/:roomId",async (req,res) => {
             },
             take: 1000
         });
+        // newest first keeps the take to the most recent strokes, but they have
+        // to be replayed oldest first so the board is drawn in the right order
         res.json({
-            messages
+            messages: messages.reverse()
         })
     }
     catch(e){
-        console.log(e);
-        res.json({
-            messages:[]
+        console.error(e);
+        res.status(500).json({
+            message:"Could not load this room"
         })
     }
 })
-app.get("/room/:slug",async (req,res) => {
-    const slug = req.params.slug;
+app.get("/room/:slug",middleware,async (req,res) => {
+    const slug = String(req.params.slug ?? "");
     const room = await prismaClient.room.findFirst({
         where:{
             slug
         }
     });
+    if(!room){
+        res.status(404).json({
+            message:"Room not found"
+        })
+        return;
+    }
     res.json({
         room
     })
@@ -138,7 +152,8 @@ app.get("/room", middleware, async (req, res) => {
       //@ts-ignore
       const userId = req.userId;
       const rooms = await prismaClient.room.findMany({
-          where: { adminId: userId }
+          where: { adminId: userId },
+          orderBy: { id: "desc" }
       });
       res.json({ rooms });
   })

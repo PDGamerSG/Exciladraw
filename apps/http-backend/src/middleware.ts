@@ -3,16 +3,26 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 
 export function middleware(req:Request,res:Response, next: NextFunction){
-    const token = req.headers["authorization"] ?? "";
+    const header = req.headers["authorization"] ?? "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : header;
 
-    const decoded = jwt.verify(token,JWT_SECRET);
+    // jwt.verify throws on a missing, malformed or expired token, which
+    // without this would surface as a 500 instead of a 403
+    try{
+        const decoded = jwt.verify(token,JWT_SECRET);
 
-    if(decoded){
+        if(typeof decoded === "string" || !decoded.userId){
+            res.status(403).json({
+                message:"Unauthorized"
+            })
+            return;
+        }
+
         //@ts-ignore
         req.userId = decoded.userId;
         next();
     }
-    else{
+    catch(e){
         res.status(403).json({
             message:"Unauthorized"
         })

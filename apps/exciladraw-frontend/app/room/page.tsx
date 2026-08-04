@@ -32,7 +32,16 @@ export default function RoomPage() {
         axios
             .get(`${HTTP_BACKEND}/room`, { headers: { Authorization: token } })
             .then((res) => setRooms(res.data.rooms ?? []))
-            .catch(() => setError("could not load your rooms."))
+            .catch((err) => {
+                // an expired or rejected token should send you back to sign in
+                // rather than leaving you on an empty rooms list
+                if (err?.response?.status === 401 || err?.response?.status === 403) {
+                    localStorage.removeItem("token");
+                    router.push("/signin");
+                    return;
+                }
+                setError("could not load your rooms.");
+            })
             .finally(() => setLoadingRooms(false));
     }, [router]);
 
