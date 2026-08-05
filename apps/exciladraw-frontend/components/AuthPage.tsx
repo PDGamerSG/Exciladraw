@@ -5,7 +5,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { Loader2, Pencil } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { onest } from "@/lib/fonts";
@@ -62,6 +62,14 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
             {/* ambient glow */}
             <div className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,165,255,0.14),transparent_65%)]" />
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:44px_44px]" />
+
+            <Link
+                href="/"
+                className="absolute left-4 top-4 inline-flex h-10 items-center gap-2 rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground sm:left-6 sm:top-6"
+            >
+                <ArrowLeft className="h-4 w-4" />
+                back to home
+            </Link>
 
             <div className="relative w-full max-w-sm">
                 {/* brand */}
