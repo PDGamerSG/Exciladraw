@@ -792,8 +792,10 @@ export class Board {
                     this.addShapes([shape]);
                     this.pushOp({ type: "add", shapes: [shape] });
                     this.send({ type: "draw", roomId: this.roomId, shape });
+                    // only a drag that produced something counts as finishing
+                    // the tool; a stray click should leave it armed
+                    this.callbacks.onToolFinished?.();
                 }
-                this.callbacks.onToolFinished?.();
                 break;
             }
             case "move": {
