@@ -8,27 +8,54 @@ datasource db {
 }
 
 model User{
-    id          String      @id @default(uuid())
-    email       String      @unique
+    id          String        @id @default(uuid())
+    email       String        @unique
     password    String
     name        String
     photo       String?
     rooms       Room[]
     chat        Chat[]
+    memberships RoomMember[]
 }
+
 model Room{
-    id          Int         @id @default(autoincrement())
-    slug        String      @unique
-    createAt    DateTime    @default(now())
+    id          Int           @id @default(autoincrement())
+    slug        String        @unique
+    // shared as part of the invite link, so a room id on its own is not enough
+    // to get into someone else's board
+    inviteCode  String        @unique @default(uuid())
+    createAt    DateTime      @default(now())
     adminId     String
-    admin       User        @relation(fields:[adminId],references: [id])
+    admin       User          @relation(fields:[adminId],references: [id])
     chats       Chat[]
+    members     RoomMember[]
 }
-model Chat{
-    id          Int         @id @default(autoincrement())
+
+// who is allowed into a room. the admin is a member too, so membership is the
+// single check every read and write goes through
+model RoomMember{
     roomId      Int
-    message     String
     userId      String
-    room        Room        @relation(fields: [roomId],references:[id])
-    user        User        @relation(fields: [userId],references: [id])
+    joinedAt    DateTime      @default(now())
+    room        Room          @relation(fields: [roomId],references: [id], onDelete: Cascade)
+    user        User          @relation(fields: [userId],references: [id], onDelete: Cascade)
+
+    @@id([roomId, userId])
+    @@index([userId])
+}
+
+model Chat{
+    id          Int           @id @default(autoincrement())
+    roomId      Int
+    // the drawing client's id for the shape in this row, so a shape can be
+    // erased or undone without rewriting the whole board
+    shapeId     String?
+    message     String
+    createdAt   DateTime      @default(now())
+    userId      String
+    room        Room          @relation(fields: [roomId],references:[id], onDelete: Cascade)
+    user        User          @relation(fields: [userId],references: [id])
+
+    @@unique([roomId, shapeId])
+    @@index([roomId, id])
 }
