@@ -1,127 +1,293 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Game } from "@/draw/Game";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
+import { Share2 } from "lucide-react";
+import { Board, type Peer, type Tool, type TextEditRequest } from "@/draw/Board";
+import { DEFAULT_STYLE, MAX_ZOOM, MIN_ZOOM, type Shape } from "@/draw/types";
+import { clearToken } from "@/lib/api";
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Toolbar } from "./canvas/Toolbar";
-import { MainMenu } from "./canvas/MainMenu";
-import { BackButton } from "./canvas/BackButton";
-import { PanelState } from "./canvas/PropertiesPanel";
+import { StylePanel, type PanelState } from "./canvas/StylePanel";
+import { ViewControls } from "./canvas/ViewControls";
+import { Presence } from "./canvas/Presence";
+import { BoardMenu } from "./canvas/BoardMenu";
+import { ShareDialog } from "./canvas/ShareDialog";
+import { ShortcutsDialog } from "./canvas/ShortcutsDialog";
+import { TextEditor } from "./canvas/TextEditor";
 
-export type Tool =
-    | "select"
-    | "rect"
-    | "diamond"
-    | "ellipse"
-    | "arrow"
-    | "line"
-    | "pencil";
+export type { Tool };
 
 const KEY_TO_TOOL: Record<string, Tool> = {
     v: "select", "1": "select",
-    r: "rect", "2": "rect",
-    d: "diamond", "3": "diamond",
-    o: "ellipse", "4": "ellipse",
-    a: "arrow", "5": "arrow",
-    l: "line", "6": "line",
-    p: "pencil", "7": "pencil"
+    h: "hand", "2": "hand",
+    r: "rect", "3": "rect",
+    d: "diamond", "4": "diamond",
+    o: "ellipse", "5": "ellipse",
+    a: "arrow", "6": "arrow",
+    l: "line", "7": "line",
+    p: "pencil", "8": "pencil",
+    t: "text", "9": "text",
+    e: "eraser", "0": "eraser",
 };
 
-const CURSOR_FOR_TOOL: Record<string, string> = {
-    select: "default"
+const CURSOR_FOR_TOOL: Partial<Record<Tool, string>> = {
+    select: "default",
+    hand: "grab",
+    text: "text",
+    eraser: "cell",
 };
+
+/** The panel is only useful for tools that produce something styled. */
+const TOOLS_WITH_STYLE: Tool[] = ["rect", "diamond", "ellipse", "arrow", "line", "pencil", "text"];
 
 export function Canvas({
     roomId,
-    socket
+    socket,
+    roomName,
+    inviteCode,
 }: {
     roomId: string;
     socket: WebSocket;
+    roomName?: string;
+    inviteCode?: string;
 }) {
+    const router = useRouter();
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [game, setGame] = useState<Game>();
+    const boardRef = useRef<Board | null>(null);
+
     const [selectedTool, setSelectedTool] = useState<Tool>("select");
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-    const [panelState, setPanelState] = useState<PanelState>({
-        strokeColor: "#d3d3d3",
-        fillColor: "transparent",
-        strokeWidth: 1,
-        strokeStyle: "solid",
-        edges: "sharp",
-        opacity: 100
-    });
-
-    const updatePanelState = useCallback((patch: Partial<PanelState>) => {
-        setPanelState((prev) => ({ ...prev, ...patch }));
-    }, []);
+    const [zoom, setZoom] = useState(1);
+    const [selection, setSelection] = useState<Shape[]>([]);
+    const [history, setHistory] = useState({ canUndo: false, canRedo: false });
+    const [peers, setPeers] = useState<Peer[]>([]);
+    const [textEdit, setTextEdit] = useState<TextEditRequest | null>(null);
+    const [style, setStyle] = useState<PanelState>({ ...DEFAULT_STYLE });
+    const [shareOpen, setShareOpen] = useState(false);
+    const [shortcutsOpen, setShortcutsOpen] = useState(false);
+    const [hasShapes, setHasShapes] = useState(false);
 
     useEffect(() => {
-        game?.setTool(selectedTool);
-    }, [selectedTool, game]);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-    useEffect(() => {
-        game?.setStyle(panelState);
-    }, [panelState, game]);
+        const board = new Board(canvas, roomId, socket, {
+            onCameraChange: (camera) => setZoom(camera.zoom),
+            onSelectionChange: setSelection,
+            onHistoryChange: setHistory,
+            onPeersChange: setPeers,
+            onTextEdit: setTextEdit,
+            // a shape tool is a one-shot: after drawing, you almost always want
+            // to grab what you just made rather than draw a second one
+            onToolFinished: () => setSelectedTool("select"),
+        });
+        boardRef.current = board;
 
-    useEffect(() => {
-        if (!canvasRef.current) return;
-        const g = new Game(canvasRef.current, roomId, socket);
-        setGame(g);
+        const resize = () => {
+            board.resize(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+        };
+        resize();
+        window.addEventListener("resize", resize);
+
         return () => {
-            g.destroy();
+            window.removeEventListener("resize", resize);
+            board.destroy();
+            boardRef.current = null;
         };
     }, [roomId, socket]);
 
     useEffect(() => {
-        const onResize = () =>
-            setDimensions({ width: window.innerWidth, height: window.innerHeight });
-        onResize();
-        window.addEventListener("resize", onResize);
-        return () => window.removeEventListener("resize", onResize);
-    }, []);
+        boardRef.current?.setTool(selectedTool);
+    }, [selectedTool]);
 
-    // resizing a canvas element wipes its contents, so redraw once the new
-    // width/height have been committed to the DOM
+    // the undo stack having anything in it is a good enough proxy for "this
+    // board has content", without the engine having to publish a shape count
     useEffect(() => {
-        game?.resize();
-    }, [dimensions, game]);
+        if (history.canUndo) setHasShapes(true);
+    }, [history.canUndo]);
+
+    const updateStyle = useCallback((patch: Partial<PanelState>) => {
+        setStyle((prev) => ({ ...prev, ...patch }));
+        boardRef.current?.setStyle(patch);
+    }, []);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
-            const target = e.target as HTMLElement;
-            if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+            const target = e.target as HTMLElement | null;
+            if (
+                target &&
+                (target.tagName === "INPUT" ||
+                    target.tagName === "TEXTAREA" ||
+                    target.isContentEditable)
+            ) {
+                return;
+            }
+
+            const board = boardRef.current;
+            if (!board) return;
+
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === "=" || e.key === "+") {
+                    e.preventDefault();
+                    board.setZoom(board.getCamera().zoom * 1.2);
+                } else if (e.key === "-") {
+                    e.preventDefault();
+                    board.setZoom(board.getCamera().zoom / 1.2);
+                } else if (e.key === "0") {
+                    e.preventDefault();
+                    board.setZoom(1);
+                }
+                return;
+            }
+            if (e.altKey) return;
+
+            if (e.shiftKey && e.key === "!") {
+                e.preventDefault();
+                board.zoomToFit();
+                return;
+            }
+            if (e.key === "?") {
+                e.preventDefault();
+                setShortcutsOpen(true);
+                return;
+            }
+            if (e.shiftKey) return;
+
             const tool = KEY_TO_TOOL[e.key.toLowerCase()];
             if (tool) setSelectedTool(tool);
         };
+
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
 
+    async function exportPng() {
+        const blob = await boardRef.current?.toPng();
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${(roomName || `board-${roomId}`).replace(/[^\w-]+/g, "-")}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function signOut() {
+        clearToken();
+        router.push("/signin");
+    }
+
+    const showStylePanel = TOOLS_WITH_STYLE.includes(selectedTool) || selection.length > 0;
+
     return (
-        <TooltipProvider delayDuration={300}>
-            <div className="dark relative h-screen w-screen overflow-hidden bg-[#121212]">
+        <TooltipProvider delayDuration={400}>
+            <div className="dark relative h-screen w-screen overflow-hidden bg-board">
                 <canvas
                     ref={canvasRef}
-                    width={dimensions.width}
-                    height={dimensions.height}
+                    aria-label={roomName ? `Drawing board: ${roomName}` : "Drawing board"}
+                    className="block touch-none"
                     style={{ cursor: CURSOR_FOR_TOOL[selectedTool] ?? "crosshair" }}
                 />
 
-                {/* Top bar */}
-                <div className="pointer-events-none fixed inset-x-4 top-4 flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                        <BackButton />
-                        <MainMenu panelState={panelState} setPanelState={updatePanelState} />
-                    </div>
-                    <Toolbar
-                        selectedTool={selectedTool}
-                        setSelectedTool={setSelectedTool}
+                {textEdit && (
+                    <TextEditor
+                        request={textEdit}
+                        onCommit={(value) => {
+                            const board = boardRef.current;
+                            if (board) {
+                                board.commitText(
+                                    textEdit.shapeId,
+                                    value,
+                                    board.worldAt({ x: textEdit.left, y: textEdit.top }),
+                                    board.fontSizeFor(textEdit.fontSize)
+                                );
+                            }
+                            setTextEdit(null);
+                            setSelectedTool("select");
+                        }}
+                        onCancel={() => {
+                            setTextEdit(null);
+                            setSelectedTool("select");
+                        }}
                     />
-                    {/* spacer matching the controls on the left, to keep the toolbar centered */}
-                    <div className="w-20" />
+                )}
+
+                {/* Top row: board controls left, tools centred, the room right. */}
+                <div className="pointer-events-none fixed inset-x-3 top-3 flex items-start justify-between gap-3 sm:inset-x-4 sm:top-4">
+                    <BoardMenu
+                        onExport={exportPng}
+                        onClearBoard={() => boardRef.current?.clearBoard()}
+                        onShowShortcuts={() => setShortcutsOpen(true)}
+                        onSignOut={signOut}
+                        canClear={hasShapes}
+                    />
+
+                    <div className="absolute left-1/2 -translate-x-1/2">
+                        <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Presence peers={peers} />
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="button"
+                                    onClick={() => setShareOpen(true)}
+                                    className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-xl bg-amber-400 px-3.5 text-[13px] font-medium text-ink-950 shadow-[0_1px_12px_-2px_var(--amber-400)] transition-colors duration-150 hover:bg-amber-300"
+                                >
+                                    <Share2 className="h-3.5 w-3.5" />
+                                    <span className="hidden sm:inline">Share</span>
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">Invite people to this board</TooltipContent>
+                        </Tooltip>
+                    </div>
                 </div>
+
+                {/* The style panel sits under the board controls, out of the way
+                    of the drawing area but always reachable. */}
+                {showStylePanel && (
+                    <div className="pointer-events-none fixed left-3 top-16 max-h-[calc(100vh-9rem)] overflow-y-auto sm:left-4 sm:top-[4.25rem]">
+                        <StylePanel
+                            state={style}
+                            setState={updateStyle}
+                            editingCount={selection.length}
+                        />
+                    </div>
+                )}
+
+                <div className="pointer-events-none fixed bottom-3 left-3 sm:bottom-4 sm:left-4">
+                    <ViewControls
+                        zoom={zoom}
+                        onZoomIn={() => boardRef.current?.setZoom(zoom * 1.2)}
+                        onZoomOut={() => boardRef.current?.setZoom(zoom / 1.2)}
+                        onZoomReset={() => boardRef.current?.setZoom(1)}
+                        onZoomToFit={() => boardRef.current?.zoomToFit()}
+                        onUndo={() => boardRef.current?.undo()}
+                        onRedo={() => boardRef.current?.redo()}
+                        canUndo={history.canUndo}
+                        canRedo={history.canRedo}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => setShortcutsOpen(true)}
+                    className="panel fixed bottom-3 right-3 hidden h-8 items-center rounded-xl px-3 font-mono text-[11px] text-chalk-500 transition-colors duration-150 hover:text-chalk-100 sm:bottom-4 sm:right-4 sm:flex"
+                >
+                    ? shortcuts
+                </button>
+
+                <ShareDialog
+                    open={shareOpen}
+                    onClose={() => setShareOpen(false)}
+                    inviteCode={inviteCode}
+                    roomName={roomName}
+                />
+                <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
             </div>
         </TooltipProvider>
     );
 }
+
+export { MAX_ZOOM, MIN_ZOOM };

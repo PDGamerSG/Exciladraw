@@ -71,6 +71,9 @@ export const ClientMessageSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal("join_room"), roomId }),
     z.object({ type: z.literal("leave_room"), roomId }),
     z.object({ type: z.literal("draw"), roomId, shape: ShapeSchema }),
+    // a moved or restyled shape replaces its own row rather than appending a
+    // second copy of itself to the room's history
+    z.object({ type: z.literal("update"), roomId, shapes: z.array(ShapeSchema).min(1).max(200) }),
     z.object({ type: z.literal("erase"), roomId, shapeIds: z.array(z.string().max(64)).min(1).max(200) }),
     z.object({ type: z.literal("cursor"), roomId, x: finite, y: finite })
 ]);

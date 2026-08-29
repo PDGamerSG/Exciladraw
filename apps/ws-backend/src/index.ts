@@ -222,6 +222,29 @@ wss.on('connection', async function connection(ws, request) {
       return;
     }
 
+    if (msg.type === "update") {
+      try {
+        await prismaClient.$transaction(msg.shapes.map((shape) =>
+          prismaClient.chat.upsert({
+            where: { roomId_shapeId: { roomId: numericRoomId, shapeId: shape.id } },
+            create: {
+              roomId: numericRoomId,
+              shapeId: shape.id,
+              message: JSON.stringify({ shape }),
+              userId
+            },
+            update: { message: JSON.stringify({ shape }) }
+          })
+        ));
+      } catch (e) {
+        console.error("could not update the shapes", e);
+        return;
+      }
+
+      broadcast(roomId, { type: "update", roomId, shapes: msg.shapes }, ws);
+      return;
+    }
+
     if (msg.type === "erase") {
       try {
         await prismaClient.chat.deleteMany({
