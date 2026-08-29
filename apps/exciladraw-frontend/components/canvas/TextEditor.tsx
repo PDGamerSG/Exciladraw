@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { TextEditRequest } from "@/draw/Board";
 
 /**
@@ -20,6 +20,17 @@ export function TextEditor({
 }) {
     const ref = useRef<HTMLTextAreaElement>(null);
     const committed = useRef(false);
+    const { fontSize } = request;
+
+    const resize = useCallback(
+        (el: HTMLTextAreaElement) => {
+            el.style.height = "auto";
+            el.style.height = `${el.scrollHeight}px`;
+            el.style.width = "auto";
+            el.style.width = `${Math.max(el.scrollWidth, fontSize * 2)}px`;
+        },
+        [fontSize]
+    );
 
     useEffect(() => {
         const el = ref.current;
@@ -27,14 +38,7 @@ export function TextEditor({
         el.focus();
         el.setSelectionRange(el.value.length, el.value.length);
         resize(el);
-    }, [request]);
-
-    function resize(el: HTMLTextAreaElement) {
-        el.style.height = "auto";
-        el.style.height = `${el.scrollHeight}px`;
-        el.style.width = "auto";
-        el.style.width = `${Math.max(el.scrollWidth, request.fontSize * 2)}px`;
-    }
+    }, [request, resize]);
 
     function commit(value: string) {
         if (committed.current) return;

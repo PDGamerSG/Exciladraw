@@ -1,239 +1,236 @@
 import Link from "next/link";
 import {
-  ArrowRight,
-  Lock,
-  Pencil,
-  Shapes,
-  Share2,
-  Sparkles,
-  Users,
-  Zap,
+    ArrowRight,
+    Circle,
+    Diamond,
+    Eraser,
+    Hand,
+    Minus,
+    MousePointer2,
+    MoveRight,
+    Pencil,
+    Scan,
+    Share2,
+    Shield,
+    Signature,
+    Square,
+    Type,
+    Undo2,
+    Users,
 } from "lucide-react";
-import { onest } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
+import { HeroSheet } from "@/components/HeroSheet";
+import { Wordmark } from "@/components/Wordmark";
 
 const FEATURES = [
-  {
-    icon: Pencil,
-    title: "freehand drawing",
-    description: "natural strokes that feel like pen on paper — fluid, expressive, precise.",
-  },
-  {
-    icon: Shapes,
-    title: "shapes & arrows",
-    description: "rectangles, diamonds, ellipses, arrows and lines. everything you need to diagram.",
-  },
-  {
-    icon: Users,
-    title: "real-time collaboration",
-    description: "share a room and sketch together. every stroke syncs live over websockets.",
-  },
-  {
-    icon: Share2,
-    title: "room based sharing",
-    description: "create a room, send the link, and your team is on the same canvas in seconds.",
-  },
-  {
-    icon: Zap,
-    title: "fast by default",
-    description: "a lightweight canvas renderer keeps drawing smooth even on busy boards.",
-  },
-  {
-    icon: Lock,
-    title: "your boards, protected",
-    description: "rooms live behind your account. only people you invite can join in.",
-  },
+    {
+        icon: Signature,
+        title: "Freehand that stays smooth",
+        body: "Strokes are curved through their own sample points as you draw, then thinned before they're saved. A fast scribble still looks like one.",
+    },
+    {
+        icon: Square,
+        title: "Shapes that square off",
+        body: "Rectangles, diamonds, ellipses, arrows and lines. Hold Shift to keep a box square or lock an arrow to 15° steps.",
+    },
+    {
+        icon: Users,
+        title: "Everyone's cursor, live",
+        body: "See where your teammates are pointing and what they're drawing, the moment they draw it.",
+    },
+    {
+        icon: Scan,
+        title: "A canvas that doesn't end",
+        body: "Pan with space, zoom with Ctrl-scroll, and press Shift 1 to bring the whole drawing back on screen.",
+    },
+    {
+        icon: Undo2,
+        title: "Undo the whole room sees",
+        body: "Ctrl Z takes a stroke back for everyone on the board, not just on your screen. So does moving, restyling and erasing.",
+    },
+    {
+        icon: Shield,
+        title: "Boards stay private",
+        body: "A board opens only for the people you send the invite link to. Guessing a board number gets you nowhere.",
+    },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    title: "create your account",
-    description: "sign up in seconds — just a name, email and password.",
-  },
-  {
-    n: "02",
-    title: "open a room",
-    description: "name a room and your infinite canvas is ready immediately.",
-  },
-  {
-    n: "03",
-    title: "sketch together",
-    description: "invite teammates to the room and watch ideas take shape live.",
-  },
+const TOOLBOX = [
+    { icon: MousePointer2, name: "Select", key: "V" },
+    { icon: Hand, name: "Pan", key: "H" },
+    { icon: Square, name: "Rectangle", key: "R" },
+    { icon: Diamond, name: "Diamond", key: "D" },
+    { icon: Circle, name: "Ellipse", key: "O" },
+    { icon: MoveRight, name: "Arrow", key: "A" },
+    { icon: Minus, name: "Line", key: "L" },
+    { icon: Pencil, name: "Draw", key: "P" },
+    { icon: Type, name: "Text", key: "T" },
+    { icon: Eraser, name: "Eraser", key: "E" },
 ];
+
+function SectionLabel({ children }: { children: string }) {
+    return (
+        <div className="mb-4 flex items-center gap-3">
+            <span className="h-px w-8 bg-ink-600" aria-hidden />
+            <span className="eyebrow">{children}</span>
+        </div>
+    );
+}
 
 export default function Page() {
-  return (
-    <div
-      className={cn(
-        onest.className,
-        "dark relative min-h-screen w-full overflow-hidden bg-background text-foreground"
-      )}
-    >
-      {/* ambient glow + grid */}
-      <div className="pointer-events-none absolute -top-48 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,165,255,0.14),transparent_65%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:44px_44px]" />
+    return (
+        <div className="relative min-h-screen overflow-x-hidden">
+            <div className="lamp pointer-events-none absolute -top-56 left-1/2 h-[620px] w-[1000px] -translate-x-1/2" />
+            <div className="grid-paper pointer-events-none absolute inset-x-0 top-0 h-[900px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 
-      <div className="relative mx-auto w-full max-w-5xl px-6 lg:px-8">
-        {/* nav */}
-        <header className="flex h-20 items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
-              <Pencil className="h-4 w-4 text-[#a8a5ff]" />
+            <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-8">
+                <header className="flex h-20 items-center justify-between">
+                    <Wordmark />
+                    <nav className="flex items-center gap-1.5">
+                        <Link
+                            href="/signin"
+                            className="inline-flex h-9 items-center rounded-xl px-3.5 text-[13px] text-chalk-300 transition-colors duration-200 hover:bg-ink-800 hover:text-chalk-100"
+                        >
+                            Sign in
+                        </Link>
+                        <Link
+                            href="/signup"
+                            className="inline-flex h-9 items-center rounded-xl bg-amber-400 px-3.5 text-[13px] font-medium text-ink-950 transition-colors duration-200 hover:bg-amber-300"
+                        >
+                            Start a board
+                        </Link>
+                    </nav>
+                </header>
+
+                <main>
+                    <section className="pb-12 pt-10 sm:pb-16 sm:pt-16">
+                        <div className="rise mx-auto max-w-2xl text-center">
+                            <p className="eyebrow">Open source · Real-time</p>
+                            <h1 className="mt-5 font-display text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.02em] text-chalk-100 sm:text-6xl">
+                                Draw it out.
+                                <br />
+                                <span className="text-amber-400">Together, live.</span>
+                            </h1>
+                            <p className="mx-auto mt-6 max-w-lg text-[15px] leading-relaxed text-chalk-300">
+                                Shapes, arrows and freehand strokes on an infinite canvas. Send one
+                                link and your whole team is sketching on the same board, every
+                                stroke arriving as it&apos;s drawn.
+                            </p>
+                            <div className="mt-9 flex flex-col items-center justify-center gap-2.5 sm:flex-row">
+                                <Link
+                                    href="/signup"
+                                    className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 px-6 text-sm font-medium text-ink-950 shadow-[0_2px_24px_-6px_var(--amber-400)] transition-colors duration-200 hover:bg-amber-300 sm:w-auto"
+                                >
+                                    Start a board
+                                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                                </Link>
+                                <Link
+                                    href="/signin"
+                                    className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-ink-700 px-6 text-sm text-chalk-300 transition-colors duration-200 hover:border-ink-600 hover:bg-ink-850 hover:text-chalk-100 sm:w-auto"
+                                >
+                                    Open your boards
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div
+                            className="rise mt-12 sm:mt-16"
+                            style={{ animationDelay: "0.15s" }}
+                        >
+                            <HeroSheet />
+                        </div>
+                    </section>
+
+                    <section className="border-t border-ink-800 py-14 sm:py-20">
+                        <SectionLabel>What you get</SectionLabel>
+                        <h2 className="max-w-xl font-display text-2xl font-semibold tracking-tight text-chalk-100 sm:text-3xl">
+                            Built to keep up with a room full of people thinking out loud.
+                        </h2>
+
+                        <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-ink-800 bg-ink-800 sm:grid-cols-2 lg:grid-cols-3">
+                            {FEATURES.map(({ icon: Icon, title, body }) => (
+                                <article
+                                    key={title}
+                                    className="group bg-ink-950 p-6 transition-colors duration-300 hover:bg-ink-900"
+                                >
+                                    <Icon
+                                        className="h-[18px] w-[18px] text-amber-400 transition-transform duration-300 group-hover:-translate-y-0.5"
+                                        aria-hidden
+                                    />
+                                    <h3 className="mb-2 mt-5 font-display text-[15px] font-semibold tracking-tight text-chalk-100">
+                                        {title}
+                                    </h3>
+                                    <p className="text-[13px] leading-relaxed text-chalk-500">
+                                        {body}
+                                    </p>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* The toolbox is the product, so the page shows it rather than
+                        narrating a three-step signup flow. */}
+                    <section className="border-t border-ink-800 py-14 sm:py-20">
+                        <SectionLabel>The toolbox</SectionLabel>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                            <h2 className="max-w-md font-display text-2xl font-semibold tracking-tight text-chalk-100 sm:text-3xl">
+                                Ten tools, each one keystroke away.
+                            </h2>
+                            <p className="max-w-xs text-[13px] leading-relaxed text-chalk-500">
+                                Every tool answers to a letter and a number, so your hand never has
+                                to leave the board to find it.
+                            </p>
+                        </div>
+
+                        <ul className="mt-10 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+                            {TOOLBOX.map(({ icon: Icon, name, key }) => (
+                                <li
+                                    key={name}
+                                    className="flex items-center gap-3 rounded-xl border border-ink-800 bg-ink-900 px-3.5 py-3 transition-colors duration-200 hover:border-ink-700"
+                                >
+                                    <Icon className="h-4 w-4 shrink-0 text-chalk-300" aria-hidden />
+                                    <span className="flex-1 truncate text-[13px] text-chalk-300">
+                                        {name}
+                                    </span>
+                                    <kbd className="rounded-md border border-ink-700 bg-ink-850 px-1.5 py-0.5 font-mono text-[10px] text-chalk-500">
+                                        {key}
+                                    </kbd>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+
+                    <section className="border-t border-ink-800 py-14 sm:py-20">
+                        <div className="sheet relative overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 px-6 py-16 text-center sm:py-20">
+                            <div className="lamp pointer-events-none absolute -top-24 left-1/2 h-[320px] w-[560px] -translate-x-1/2" />
+                            <div className="grid-paper pointer-events-none absolute inset-0" />
+                            <div className="relative">
+                                <h2 className="font-display text-2xl font-semibold tracking-tight text-chalk-100 sm:text-3xl">
+                                    Open a blank board.
+                                </h2>
+                                <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-chalk-300">
+                                    Make an account, name a board, send the link. That&apos;s the whole
+                                    setup.
+                                </p>
+                                <Link
+                                    href="/signup"
+                                    className="group mt-8 inline-flex h-11 items-center gap-2 rounded-xl bg-amber-400 px-6 text-sm font-medium text-ink-950 shadow-[0_2px_24px_-6px_var(--amber-400)] transition-colors duration-200 hover:bg-amber-300"
+                                >
+                                    Start drawing — it&apos;s free
+                                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                                </Link>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
+                <footer className="flex flex-col items-center justify-between gap-4 border-t border-ink-800 py-9 sm:flex-row">
+                    <Wordmark />
+                    <p className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-chalk-500">
+                        <Share2 className="h-3 w-3" aria-hidden />
+                        Open source · Built for teams
+                    </p>
+                </footer>
             </div>
-            <span className="text-sm font-medium">exciladraw</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/signin"
-              className="inline-flex h-10 items-center rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground"
-            >
-              sign in
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex h-10 items-center rounded-xl bg-foreground px-4 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
-            >
-              sign up
-            </Link>
-          </div>
-        </header>
-
-        {/* hero */}
-        <section className="flex flex-col items-center pb-24 pt-16 text-center sm:pb-32 sm:pt-24">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-foreground/5 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur-md">
-            <Sparkles className="h-3 w-3 text-[#a8a5ff]" />
-            open-source collaborative whiteboard
-          </div>
-
-          <h1 className="mt-8 max-w-2xl text-4xl font-semibold leading-[1.15] tracking-tight sm:text-6xl sm:leading-[1.1]">
-            think out loud,
-            <br />
-            <span className="text-[#a8a5ff]">sketch it together.</span>
-          </h1>
-          <p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-            a clean, fast whiteboard for teams. draw shapes, arrows and freehand
-            strokes on an infinite canvas — synced live with everyone in the room.
-          </p>
-
-          <div className="mt-10 flex w-full flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row">
-            <Link
-              href="/signup"
-              className="group inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground px-6 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85 sm:w-auto"
-            >
-              start sketching
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
-            <Link
-              href="/signin"
-              className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 px-6 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground sm:w-auto"
-            >
-              open your rooms
-            </Link>
-          </div>
-
-          {/* canvas preview */}
-          <div className="mt-20 w-full rounded-2xl border border-primary/10 bg-foreground/5 p-2 backdrop-blur-md sm:p-2.5">
-            <div className="relative overflow-hidden rounded-xl bg-[#121212]">
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
-              <svg viewBox="0 0 800 380" className="relative w-full">
-                <rect x="90" y="90" width="180" height="110" rx="2" fill="none" stroke="#1971c2" strokeWidth="2" />
-                <text x="180" y="150" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">idea</text>
-                <path d="M275 145 C 330 145, 350 145, 400 145" fill="none" stroke="#d3d3d3" strokeWidth="2" />
-                <path d="M388 137 L 402 145 L 388 153" fill="none" stroke="#d3d3d3" strokeWidth="2" />
-                <path d="M485 90 L 570 145 L 485 200 L 400 145 Z" fill="none" stroke="#f08c00" strokeWidth="2" />
-                <text x="485" y="150" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">ship it?</text>
-                <path d="M570 145 C 620 145, 640 145, 680 145" fill="none" stroke="#d3d3d3" strokeWidth="2" />
-                <path d="M668 137 L 682 145 L 668 153" fill="none" stroke="#d3d3d3" strokeWidth="2" />
-                <ellipse cx="700" cy="260" rx="70" ry="45" fill="none" stroke="#2f9e44" strokeWidth="2" />
-                <text x="700" y="265" textAnchor="middle" fill="#d3d3d3" fontSize="15" fontFamily="inherit">yes</text>
-                <path d="M120 280 C 180 240, 260 320, 330 270 S 430 250, 470 290" fill="none" stroke="#e03131" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-        </section>
-
-        {/* features */}
-        <section className="border-t border-primary/10 py-20 sm:py-24">
-          <div className="mb-12">
-            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              features
-            </p>
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              everything you need to think visually
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-primary/10 bg-foreground/5 p-6 backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10"
-              >
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5">
-                  <Icon className="h-4 w-4 text-[#a8a5ff]" />
-                </div>
-                <h3 className="mb-2 text-sm font-medium">{title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* how it works */}
-        <section className="border-t border-primary/10 py-20 sm:py-24">
-          <div className="mb-12">
-            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              how it works
-            </p>
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              up and running in seconds
-            </h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {STEPS.map(({ n, title, description }) => (
-              <div
-                key={n}
-                className="rounded-2xl border border-primary/10 bg-foreground/5 p-6 backdrop-blur-md"
-              >
-                <span className="text-xs font-medium text-[#a8a5ff]">{n}</span>
-                <h3 className="mb-2 mt-4 text-sm font-medium">{title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* cta */}
-        <section className="border-t border-primary/10 py-20 sm:py-24">
-          <div className="flex flex-col items-center gap-6 rounded-2xl border border-primary/10 bg-foreground/5 px-6 py-16 text-center backdrop-blur-md sm:py-20">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              start with a blank canvas.
-            </h2>
-            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-              create an account, open a room, and draw with your team right now.
-            </p>
-            <Link
-              href="/signup"
-              className="group inline-flex h-11 items-center gap-2 rounded-xl bg-foreground px-6 text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85"
-            >
-              get started — it&apos;s free
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
-          </div>
-        </section>
-
-        {/* footer */}
-        <footer className="flex flex-col items-center justify-between gap-4 border-t border-primary/10 py-10 sm:flex-row">
-          <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/10 bg-foreground/5">
-              <Pencil className="h-3.5 w-3.5 text-[#a8a5ff]" />
-            </div>
-            <span className="text-sm font-medium">exciladraw</span>
-          </div>
-          <span className="text-xs text-muted-foreground">open source · built for teams</span>
-        </footer>
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

@@ -38,7 +38,7 @@ function IconButton({
             <TooltipContent side="top">
                 {label}
                 {shortcut && (
-                    <kbd className="ml-2 font-mono text-[10px] text-ink-950/60">{shortcut}</kbd>
+                    <kbd className="ml-2 font-mono text-[10px] text-chalk-500">{shortcut}</kbd>
                 )}
             </TooltipContent>
         </Tooltip>

@@ -4,7 +4,9 @@ import { DEFAULT_STYLE, type Bounds, type LegacyShapeFields, type Shape, type Sh
 export const BOARD_BACKGROUND = "#121212";
 const GRID_COLOR = "rgba(255,255,255,0.055)";
 const GRID_COLOR_MAJOR = "rgba(255,255,255,0.09)";
-export const ACCENT = "#a8a5ff";
+// selection chrome is the interface amber, deliberately lighter and warmer
+// than the amber pen so an amber-stroked shape still reads as selected
+export const ACCENT = "#ffb35c";
 
 /** Grid spacings we step through as you zoom, so lines never crowd together. */
 const GRID_STEPS = [10, 20, 50, 100, 250, 500, 1000, 2500];
@@ -282,8 +284,8 @@ export function drawMarquee(ctx: CanvasRenderingContext2D, box: Bounds, zoom: nu
     ctx.save();
     ctx.globalAlpha = 1;
     ctx.setLineDash([]);
-    ctx.fillStyle = "rgba(168,165,255,0.08)";
-    ctx.strokeStyle = "rgba(168,165,255,0.55)";
+    ctx.fillStyle = "rgba(255,179,92,0.09)";
+    ctx.strokeStyle = "rgba(255,179,92,0.55)";
     ctx.lineWidth = 1 / zoom;
     const w = box.maxX - box.minX;
     const h = box.maxY - box.minY;
@@ -292,7 +294,8 @@ export function drawMarquee(ctx: CanvasRenderingContext2D, box: Bounds, zoom: nu
     ctx.restore();
 }
 
-const PEER_COLORS = ["#a8a5ff", "#4dd4ac", "#ff9f6e", "#ff8fb1", "#6ec5ff", "#ffd166"];
+// the pen tray, so a collaborator's cursor is coloured like the ink they draw with
+const PEER_COLORS = ["#a78bfa", "#4ade80", "#60a5fa", "#ff8fb1", "#fbbf24", "#ff6b6b"];
 
 export function peerColor(userId: string) {
     let hash = 0;

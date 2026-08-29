@@ -17,13 +17,14 @@ export function ShareDialog({
     roomName?: string;
 }) {
     const [copied, setCopied] = useState(false);
-    const [link, setLink] = useState("");
 
-    useEffect(() => {
-        // the origin is only knowable in the browser, so the link is built
-        // after mount rather than guessed during the server render
-        if (inviteCode) setLink(`${window.location.origin}/join/${inviteCode}`);
-    }, [inviteCode]);
+    // the origin is only knowable in the browser. the dialog's contents never
+    // reach the server render — Modal portals into document.body and bails out
+    // without one — so reading it here cannot desync hydration
+    const link =
+        inviteCode && typeof window !== "undefined"
+            ? `${window.location.origin}/join/${inviteCode}`
+            : "";
 
     useEffect(() => {
         if (!copied) return;

@@ -84,7 +84,7 @@ export function Toolbar({
                         </TooltipTrigger>
                         <TooltipContent side="bottom">
                             {label}
-                            <kbd className="ml-2 font-mono text-[10px] text-ink-950/60">
+                            <kbd className="ml-2 font-mono text-[10px] text-chalk-500">
                                 {letter} · {digit}
                             </kbd>
                         </TooltipContent>

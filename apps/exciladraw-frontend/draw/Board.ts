@@ -54,6 +54,7 @@ export type BoardCallbacks = {
     onSelectionChange?: (shapes: Shape[]) => void;
     onHistoryChange?: (state: { canUndo: boolean; canRedo: boolean }) => void;
     onPeersChange?: (peers: Peer[]) => void;
+    onShapeCountChange?: (count: number) => void;
     onTextEdit?: (request: TextEditRequest | null) => void;
     /** Fires when a one-shot tool has finished, so the UI can fall back to select. */
     onToolFinished?: () => void;
@@ -193,6 +194,7 @@ export class Board {
     private setShapes(shapes: Shape[]) {
         this.shapes = shapes;
         this.byId = new Map(shapes.map((s) => [s.id, s]));
+        this.emitShapeCount();
     }
 
     /* ── public API ────────────────────────────────────────────────────── */
@@ -514,6 +516,7 @@ export class Board {
             this.shapes.push(shape);
             this.byId.set(shape.id, shape);
         }
+        this.emitShapeCount();
     }
 
     private removeShapes(ids: string[]) {
@@ -523,6 +526,7 @@ export class Board {
             this.byId.delete(id);
             this.selected.delete(id);
         }
+        this.emitShapeCount();
     }
 
     private applyUpdate(_before: Shape[], after: Shape[]) {
@@ -592,7 +596,7 @@ export class Board {
         let message: unknown;
         try {
             message = JSON.parse(event.data);
-        } catch (e) {
+        } catch {
             return;
         }
         if (typeof message !== "object" || message === null) return;
@@ -1051,6 +1055,10 @@ export class Board {
 
     private emitSelection() {
         this.callbacks.onSelectionChange?.(this.selectedShapes());
+    }
+
+    private emitShapeCount() {
+        this.callbacks.onShapeCountChange?.(this.shapes.length);
     }
 
     private emitHistory() {

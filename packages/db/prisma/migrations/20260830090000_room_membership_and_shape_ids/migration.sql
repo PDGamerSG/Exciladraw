@@ -4,9 +4,12 @@ ALTER TABLE "Room" ADD COLUMN "inviteCode" TEXT;
 UPDATE "Room" SET "inviteCode" = gen_random_uuid()::text WHERE "inviteCode" IS NULL;
 ALTER TABLE "Room" ALTER COLUMN "inviteCode" SET NOT NULL;
 
--- AlterTable
+-- AlterTable. Shapes drawn before this migration have no id inside their JSON,
+-- so each existing row is given one here — the client reads the id off the row
+-- and can then select, move or erase an old shape like any other.
 ALTER TABLE "Chat" ADD COLUMN "shapeId" TEXT;
 ALTER TABLE "Chat" ADD COLUMN "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "Chat" SET "shapeId" = gen_random_uuid()::text WHERE "shapeId" IS NULL;
 
 -- CreateTable
 CREATE TABLE "RoomMember" (

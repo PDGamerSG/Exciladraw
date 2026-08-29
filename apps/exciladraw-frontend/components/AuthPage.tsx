@@ -1,18 +1,25 @@
 "use client";
 
-import { HTTP_BACKEND } from "@/config";
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { ArrowLeft, Loader2, Pencil } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { api, errorMessage, setToken } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { onest } from "@/lib/fonts";
-import { cn } from "@/lib/utils";
+import { Wordmark } from "@/components/Wordmark";
+
+/** Only same-origin paths are followed, so ?next= cannot bounce you offsite. */
+function safeNext(next: string | null) {
+    if (!next || !next.startsWith("/") || next.startsWith("//")) return "/room";
+    return next;
+}
 
 export function AuthPage({ isSignin }: { isSignin: boolean }) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const next = safeNext(searchParams.get("next"));
+
     const [name, setName] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -24,116 +31,118 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
         setError("");
         setLoading(true);
         try {
-            if (isSignin) {
-                const res = await axios.post(`${HTTP_BACKEND}/signin`, {
-                    username,
-                    password
-                });
-                localStorage.setItem("token", res.data.token);
-                router.push("/room");
-            } else {
-                await axios.post(`${HTTP_BACKEND}/signup`, {
-                    username,
-                    password,
-                    name
-                });
-                router.push("/signin");
-            }
-        } catch (err) {
-            const message = axios.isAxiosError(err)
-                ? err.response?.data?.message
-                : undefined;
-            setError(
-                message ??
-                    (isSignin ? "could not sign you in. check your details." : "could not create your account. try again.")
+            const res = await api.post<{ token: string }>(
+                isSignin ? "/signin" : "/signup",
+                isSignin ? { username, password } : { username, password, name }
             );
-        } finally {
+            // signing up returns a token too, so a new account lands on their
+            // boards instead of being bounced back to the sign in form
+            setToken(res.data.token);
+            router.push(next);
+        } catch (err) {
+            setError(
+                errorMessage(
+                    err,
+                    isSignin
+                        ? "Couldn't sign you in. Check your email and password."
+                        : "Couldn't create your account. Try again."
+                )
+            );
             setLoading(false);
         }
     }
 
+    const passwordHint = isSignin ? undefined : "At least 6 characters.";
+
     return (
-        <div
-            className={cn(
-                onest.className,
-                "dark relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-background px-4 text-foreground"
-            )}
-        >
-            {/* ambient glow */}
-            <div className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(168,165,255,0.14),transparent_65%)]" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:44px_44px]" />
+        <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-5 py-16">
+            <div className="lamp pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[760px] -translate-x-1/2" />
+            <div className="grid-paper pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
             <Link
                 href="/"
-                className="absolute left-4 top-4 inline-flex h-10 items-center gap-2 rounded-xl border border-primary/10 bg-foreground/5 px-4 text-sm text-muted-foreground backdrop-blur-md transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:border-primary/20 hover:bg-primary/10 hover:text-foreground sm:left-6 sm:top-6"
+                className="absolute left-4 top-4 inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100 sm:left-6 sm:top-6"
             >
-                <ArrowLeft className="h-4 w-4" />
-                back to home
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Back to home
             </Link>
 
-            <div className="relative w-full max-w-sm">
-                {/* brand */}
-                <div className="mb-8 flex flex-col items-center gap-3">
-                    <Link href="/" className="flex items-center gap-2.5">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-primary/10 bg-foreground/5 backdrop-blur-md">
-                            <Pencil className="h-5 w-5 text-[#a8a5ff]" />
-                        </div>
-                        <span className="text-sm font-medium">exciladraw</span>
-                    </Link>
-                    <div className="text-center">
-                        <h1 className="text-2xl font-semibold tracking-tight">
-                            {isSignin ? "welcome back" : "create your account"}
+            <div className="rise relative w-full max-w-[380px]">
+                <div className="mb-8 flex flex-col items-center gap-5 text-center">
+                    <Wordmark />
+                    <div>
+                        <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100">
+                            {isSignin ? "Welcome back" : "Create your account"}
                         </h1>
-                        <p className="mt-1.5 text-sm text-muted-foreground">
+                        <p className="mt-2 text-sm text-chalk-500">
                             {isSignin
-                                ? "sign in to keep sketching with your team"
-                                : "start sketching with your team in seconds"}
+                                ? "Sign in to pick up where your team left off."
+                                : "Your first board is about thirty seconds away."}
                         </p>
                     </div>
                 </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col gap-4 rounded-2xl border border-primary/10 bg-foreground/5 p-6 backdrop-blur-md"
+                    className="panel flex flex-col gap-4 rounded-2xl p-6"
+                    noValidate
                 >
                     {!isSignin && (
                         <div className="flex flex-col gap-2">
-                            <Label htmlFor="name">name</Label>
+                            <Label htmlFor="name" className="eyebrow">Name</Label>
                             <Input
                                 id="name"
+                                name="name"
                                 type="text"
-                                placeholder="your name"
+                                autoComplete="name"
+                                placeholder="Ada Lovelace"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
                         </div>
                     )}
+
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor="email">email</Label>
+                        <Label htmlFor="email" className="eyebrow">Email</Label>
                         <Input
                             id="email"
+                            name="email"
                             type="email"
+                            autoComplete="email"
                             placeholder="you@example.com"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
                         />
                     </div>
+
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor="password">password</Label>
+                        <Label htmlFor="password" className="eyebrow">Password</Label>
                         <Input
                             id="password"
+                            name="password"
                             type="password"
+                            autoComplete={isSignin ? "current-password" : "new-password"}
                             placeholder="••••••••"
+                            minLength={isSignin ? undefined : 6}
+                            aria-describedby={passwordHint ? "password-hint" : undefined}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        {passwordHint && (
+                            <p id="password-hint" className="text-xs text-chalk-500">
+                                {passwordHint}
+                            </p>
+                        )}
                     </div>
 
                     {error && (
-                        <p className="rounded-xl border border-destructive/20 bg-destructive/10 px-3.5 py-2.5 text-sm text-red-400">
+                        <p
+                            role="alert"
+                            className="rounded-xl border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-destructive"
+                        >
                             {error}
                         </p>
                     )}
@@ -141,29 +150,25 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-foreground text-sm font-medium text-background transition-all duration-300 ease-[cubic-bezier(0.45,0.05,0.55,0.95)] hover:bg-foreground/85 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-medium text-ink-950 transition-colors duration-200 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {isSignin ? "sign in" : "sign up"}
+                        {loading
+                            ? isSignin ? "Signing in…" : "Creating your account…"
+                            : isSignin ? "Sign in" : "Create account"}
                     </button>
-
-                    {!isSignin && (
-                        <p className="text-center text-xs text-muted-foreground">
-                            by signing up you agree to our terms & privacy policy
-                        </p>
-                    )}
                 </form>
 
-                <p className="mt-6 text-center text-sm text-muted-foreground">
-                    {isSignin ? "don't have an account? " : "already have an account? "}
+                <p className="mt-6 text-center text-[13px] text-chalk-500">
+                    {isSignin ? "No account yet? " : "Already have an account? "}
                     <Link
                         href={isSignin ? "/signup" : "/signin"}
-                        className="text-foreground underline-offset-4 transition-colors hover:underline"
+                        className="text-chalk-100 underline decoration-ink-600 underline-offset-4 transition-colors hover:decoration-amber-400"
                     >
-                        {isSignin ? "sign up" : "sign in"}
+                        {isSignin ? "Create one" : "Sign in"}
                     </Link>
                 </p>
             </div>
-        </div>
+        </main>
     );
 }

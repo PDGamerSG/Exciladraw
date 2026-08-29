@@ -65,7 +65,7 @@ export function Canvas({
     const [style, setStyle] = useState<PanelState>({ ...DEFAULT_STYLE });
     const [shareOpen, setShareOpen] = useState(false);
     const [shortcutsOpen, setShortcutsOpen] = useState(false);
-    const [hasShapes, setHasShapes] = useState(false);
+    const [shapeCount, setShapeCount] = useState(0);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -76,6 +76,7 @@ export function Canvas({
             onSelectionChange: setSelection,
             onHistoryChange: setHistory,
             onPeersChange: setPeers,
+            onShapeCountChange: setShapeCount,
             onTextEdit: setTextEdit,
             // a shape tool is a one-shot: after drawing, you almost always want
             // to grab what you just made rather than draw a second one
@@ -99,12 +100,6 @@ export function Canvas({
     useEffect(() => {
         boardRef.current?.setTool(selectedTool);
     }, [selectedTool]);
-
-    // the undo stack having anything in it is a good enough proxy for "this
-    // board has content", without the engine having to publish a shape count
-    useEffect(() => {
-        if (history.canUndo) setHasShapes(true);
-    }, [history.canUndo]);
 
     const updateStyle = useCallback((patch: Partial<PanelState>) => {
         setStyle((prev) => ({ ...prev, ...patch }));
@@ -219,7 +214,7 @@ export function Canvas({
                         onClearBoard={() => boardRef.current?.clearBoard()}
                         onShowShortcuts={() => setShortcutsOpen(true)}
                         onSignOut={signOut}
-                        canClear={hasShapes}
+                        canClear={shapeCount > 0}
                     />
 
                     <div className="absolute left-1/2 -translate-x-1/2">
