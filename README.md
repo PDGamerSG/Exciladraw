@@ -3,7 +3,17 @@
 An open-source, real-time collaborative whiteboard. Draw shapes, arrows and freehand
 strokes on an infinite canvas — every stroke syncs live with everyone in the room.
 
-## What's inside?
+## Diagram tools
+
+Start with four editable templates, align and distribute selected shapes, and
+save a board or selection as an editable file to reuse in another room. Open the
+board menu for **Browse templates**, **Import board file**, and **Save board file**.
+Inserts and arrangement changes support undo/redo and live collaboration.
+
+See [the diagram workflow guide](docs/diagram-workflow.md) for usage, file limits,
+project references, and verification details.
+
+## Repository layout
 
 This Turborepo includes the following apps and packages:
 

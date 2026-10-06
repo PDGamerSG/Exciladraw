@@ -35,8 +35,8 @@ export function shapeBounds(shape: Shape): Bounds {
             return {
                 minX: shape.x,
                 minY: shape.y,
-                maxX: shape.x + shape.text.length * shape.fontSize * 0.55,
-                maxY: shape.y + shape.fontSize * 1.25
+                maxX: shape.x + Math.max(...shape.text.split("\n").map((line) => line.length), 0) * shape.fontSize * 0.55,
+                maxY: shape.y + shape.text.split("\n").length * shape.fontSize * 1.25
             };
         case "pencil": {
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Share2 } from "lucide-react";
+import { Share2, LayoutTemplate, X } from "lucide-react";
 import { Board, type Peer, type Tool, type TextEditRequest } from "@/draw/Board";
 import { DEFAULT_STYLE, MAX_ZOOM, MIN_ZOOM, type Shape } from "@/draw/types";
 import { clearToken } from "@/lib/api";
@@ -15,6 +15,10 @@ import { BoardMenu } from "./canvas/BoardMenu";
 import { ShareDialog } from "./canvas/ShareDialog";
 import { ShortcutsDialog } from "./canvas/ShortcutsDialog";
 import { TextEditor } from "./canvas/TextEditor";
+import { TemplateDialog } from "./canvas/TemplateDialog";
+import { ArrangePanel } from "./canvas/ArrangePanel";
+import { MAX_DOCUMENT_BYTES, parseDocument } from "@/draw/document";
+import type { BoardTemplate } from "@/draw/templates";
 
 export type { Tool };
 
@@ -55,6 +59,7 @@ export function Canvas({
     const router = useRouter();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardRef = useRef<Board | null>(null);
+    const importRef = useRef<HTMLInputElement>(null);
 
     const [selectedTool, setSelectedTool] = useState<Tool>("select");
     const [zoom, setZoom] = useState(1);
@@ -66,6 +71,11 @@ export function Canvas({
     const [shareOpen, setShareOpen] = useState(false);
     const [shortcutsOpen, setShortcutsOpen] = useState(false);
     const [shapeCount, setShapeCount] = useState(0);
+    const [templatesOpen, setTemplatesOpen] = useState(false);
+    const [ready, setReady] = useState(false);
+    const [notice, setNotice] = useState<{ message: string; error: boolean } | null>(null);
+    const [importing, setImporting] = useState(false);
+    const closeTemplates = useCallback(() => setTemplatesOpen(false), []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -78,6 +88,10 @@ export function Canvas({
             onPeersChange: setPeers,
             onShapeCountChange: setShapeCount,
             onTextEdit: setTextEdit,
+            onLoad: (error) => {
+                setReady(!error);
+                if (error) setNotice({ message: error, error: true });
+            },
             // a shape tool is a one-shot: after drawing, you almost always want
             // to grab what you just made rather than draw a second one
             onToolFinished: () => setSelectedTool("select"),
@@ -109,6 +123,7 @@ export function Canvas({
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             const target = e.target as HTMLElement | null;
+            if (target?.closest('[role="dialog"], [role="menu"], button, select, a')) return;
             if (
                 target &&
                 (target.tagName === "INPUT" ||
@@ -167,6 +182,52 @@ export function Canvas({
         URL.revokeObjectURL(url);
     }
 
+    function saveBoard(selectionOnly = false) {
+        try {
+            const text = boardRef.current?.toDocument(selectionOnly);
+            if (!text) return;
+            const blob = new Blob([text], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${(roomName || `board-${roomId}`).replace(/[^\w-]+/g, "-")}${selectionOnly ? "-selection" : ""}.exciladraw.json`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            setNotice({ message: error instanceof Error ? error.message : "Could not save this board.", error: true });
+        }
+    }
+
+    async function importBoard(file: File) {
+        const board = boardRef.current;
+        if (!board) return;
+        setImporting(true);
+        try {
+            if (file.size > MAX_DOCUMENT_BYTES) throw new Error("This file is too large. Choose a board file under 5 MB.");
+            const shapes = parseDocument(await file.text());
+            if (boardRef.current !== board) return;
+            board.insertShapes(shapes);
+            setSelectedTool("select");
+            setNotice({ message: `Inserted ${shapes.length} shapes. Your existing work is unchanged. Undo removes this insert.`, error: false });
+        } catch (error) {
+            setNotice({ message: error instanceof Error ? error.message : "Could not read this file.", error: true });
+        } finally {
+            setImporting(false);
+        }
+    }
+
+    function insertTemplate(template: BoardTemplate) {
+        try {
+            boardRef.current?.insertShapes(template.shapes);
+            setSelectedTool("select");
+            setTemplatesOpen(false);
+            setNotice({ message: `${template.name} inserted. Double-click a label to edit it. Undo removes this insert.`, error: false });
+        } catch (error) {
+            setNotice({ message: error instanceof Error ? error.message : "Could not insert this template.", error: true });
+            setTemplatesOpen(false);
+        }
+    }
+
     function signOut() {
         clearToken();
         router.push("/signin");
@@ -183,6 +244,26 @@ export function Canvas({
                     className="block touch-none"
                     style={{ cursor: CURSOR_FOR_TOOL[selectedTool] ?? "crosshair" }}
                 />
+                <input ref={importRef} type="file" accept=".json,.exciladraw" className="hidden" aria-label="Import board file"
+                    onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        if (file) void importBoard(file);
+                    }} />
+
+                {ready && shapeCount === 0 && selectedTool === "select" && !textEdit && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+                        <div className="max-w-sm text-center">
+                            <h1 className="font-display text-xl font-medium text-chalk-100">Give your idea a starting point</h1>
+                            <p className="mt-2 text-sm leading-relaxed text-chalk-300">Draw something from scratch, or start with an editable diagram.</p>
+                            <button type="button" onClick={() => setTemplatesOpen(true)}
+                                className="pointer-events-auto mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-amber-400 px-4 text-sm font-medium text-ink-950 hover:bg-amber-300">
+                                <LayoutTemplate className="h-4 w-4" /> Browse templates
+                            </button>
+                            <p className="mt-3 text-xs text-chalk-500">Flowcharts, project boards, architecture & workshops</p>
+                        </div>
+                    </div>
+                )}
 
                 {textEdit && (
                     <TextEditor
@@ -211,13 +292,19 @@ export function Canvas({
                 <div className="pointer-events-none fixed inset-x-3 top-3 flex items-start justify-between gap-3 sm:inset-x-4 sm:top-4">
                     <BoardMenu
                         onExport={exportPng}
+                        onTemplates={() => setTemplatesOpen(true)}
+                        onImport={() => importRef.current?.click()}
+                        onSave={() => saveBoard()}
+                        onSaveSelection={() => saveBoard(true)}
+                        canSaveSelection={selection.length > 0}
+                        ready={ready && !importing}
                         onClearBoard={() => boardRef.current?.clearBoard()}
                         onShowShortcuts={() => setShortcutsOpen(true)}
                         onSignOut={signOut}
                         canClear={shapeCount > 0}
                     />
 
-                    <div className="absolute left-1/2 -translate-x-1/2">
+                    <div className="absolute left-1/2 top-12 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 overflow-x-auto sm:top-0 sm:max-w-none">
                         <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
                     </div>
 
@@ -227,6 +314,7 @@ export function Canvas({
                             <TooltipTrigger asChild>
                                 <button
                                     type="button"
+                                    aria-label="Share board"
                                     onClick={() => setShareOpen(true)}
                                     className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-xl bg-amber-400 px-3.5 text-[13px] font-medium text-ink-950 shadow-[0_1px_12px_-2px_var(--amber-400)] transition-colors duration-150 hover:bg-amber-300"
                                 >
@@ -242,12 +330,13 @@ export function Canvas({
                 {/* The style panel sits under the board controls, out of the way
                     of the drawing area but always reachable. */}
                 {showStylePanel && (
-                    <div className="pointer-events-none fixed left-3 top-16 max-h-[calc(100vh-9rem)] overflow-y-auto sm:left-4 sm:top-[4.25rem]">
+                    <div className="pointer-events-none fixed left-3 top-28 max-h-[calc(100dvh-12rem)] overflow-y-auto sm:left-4 sm:top-[4.25rem] sm:max-h-[calc(100dvh-9rem)]">
                         <StylePanel
                             state={style}
                             setState={updateStyle}
                             editingCount={selection.length}
                         />
+                        {selection.length >= 2 && <ArrangePanel count={selection.length} onArrange={(action) => boardRef.current?.arrangeSelection(action)} />}
                     </div>
                 )}
 
@@ -280,6 +369,13 @@ export function Canvas({
                     roomName={roomName}
                 />
                 <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+                <TemplateDialog open={templatesOpen} onClose={closeTemplates} onInsert={insertTemplate} />
+                {(notice || importing) && (
+                    <div className="panel fixed bottom-16 left-1/2 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-xl p-3 text-[13px] leading-relaxed text-chalk-100">
+                        <p role={notice?.error ? "alert" : "status"} className="flex-1">{importing ? "Reading board file…" : notice?.message}</p>
+                        {!importing && <button type="button" aria-label="Dismiss message" onClick={() => setNotice(null)} className="rounded p-1 text-chalk-300 hover:text-chalk-100"><X className="h-4 w-4" /></button>}
+                    </div>
+                )}
             </div>
         </TooltipProvider>
     );

@@ -1,4 +1,6 @@
 import { ShapeSchema } from "@repo/common/types";
+import { arrangeShapes, type Arrangement } from "./arrange";
+import { prepareInsertion, serializeDocument } from "./document";
 import { getExistingShapes } from "./http";
 import { boundsIntersect, boundsOf, hitTest, shapeBounds, translateShape } from "./geometry";
 import {
@@ -56,6 +58,7 @@ export type BoardCallbacks = {
     onPeersChange?: (peers: Peer[]) => void;
     onShapeCountChange?: (count: number) => void;
     onTextEdit?: (request: TextEditRequest | null) => void;
+    onLoad?: (error?: string) => void;
     /** Fires when a one-shot tool has finished, so the UI can fall back to select. */
     onToolFinished?: () => void;
 };
@@ -109,6 +112,7 @@ export class Board {
     private spaceHeld = false;
     private frame: number | null = null;
     private destroyed = false;
+    private loaded = false;
     private cursorSweep: ReturnType<typeof setInterval> | null = null;
 
     constructor(
@@ -185,8 +189,11 @@ export class Board {
             // an existing board opens showing its contents rather than an
             // empty patch of canvas wherever the origin happens to be
             if (shapes.length) this.zoomToFit({ animate: false });
+            this.loaded = true;
+            this.callbacks.onLoad?.();
         } catch (e) {
             console.error("could not load the existing shapes for this room", e);
+            if (!this.destroyed) this.callbacks.onLoad?.("Could not load this board. Reload before inserting or saving a file.");
         }
         this.requestRender();
     }
@@ -326,6 +333,37 @@ export class Board {
             this.send({ type: "draw", roomId: this.roomId, shape });
         }
         this.selected = new Set(copies.map((s) => s.id));
+        this.emitSelection();
+        this.requestRender();
+    }
+
+    /** One insert is one undo step, even for a complete diagram. */
+    insertShapes(shapes: Shape[]) {
+        if (!this.loaded) throw new Error("Wait for the board to finish loading.");
+        if (this.socket.readyState !== WebSocket.OPEN) throw new Error("Reconnect before inserting a diagram.");
+        const copies = prepareInsertion(shapes, this.toWorld({ x: this.width / 2, y: this.height / 2 }));
+        if (!copies.length) return;
+        this.setTool("select");
+        this.addShapes(copies);
+        this.pushOp({ type: "add", shapes: copies });
+        for (const shape of copies) this.send({ type: "draw", roomId: this.roomId, shape });
+        this.selected = new Set(copies.map((shape) => shape.id));
+        this.emitSelection();
+        this.zoomToFit();
+    }
+
+    toDocument(selectionOnly = false) {
+        if (!this.loaded) throw new Error("Wait for the board to finish loading.");
+        return serializeDocument(selectionOnly ? this.selectedShapes() : this.shapes);
+    }
+
+    arrangeSelection(action: Arrangement) {
+        const before = this.selectedShapes();
+        const after = arrangeShapes(before, action);
+        if (after === before || after.every((shape, index) => JSON.stringify(shape) === JSON.stringify(before[index]))) return;
+        this.applyUpdate(before, after);
+        this.pushOp({ type: "update", before, after });
+        this.send({ type: "update", roomId: this.roomId, shapes: after });
         this.emitSelection();
         this.requestRender();
     }
@@ -589,6 +627,25 @@ export class Board {
 
     private send(payload: Record<string, unknown>) {
         if (this.socket.readyState !== WebSocket.OPEN) return;
+        // Imported boards can exceed both the protocol's 200-item limit and
+        // the server's 1 MB frame limit. Keep undo, move and restyle valid too.
+        const field = payload.type === "update" ? "shapes" : payload.type === "erase" ? "shapeIds" : null;
+        if (field && Array.isArray(payload[field])) {
+            let batch: unknown[] = [];
+            let bytes = 0;
+            for (const item of payload[field]) {
+                const size = new TextEncoder().encode(JSON.stringify(item)).length;
+                if (batch.length && (batch.length === 200 || bytes + size > 900_000)) {
+                    this.socket.send(JSON.stringify({ ...payload, [field]: batch }));
+                    batch = [];
+                    bytes = 0;
+                }
+                batch.push(item);
+                bytes += size;
+            }
+            if (batch.length) this.socket.send(JSON.stringify({ ...payload, [field]: batch }));
+            return;
+        }
         this.socket.send(JSON.stringify(payload));
     }
 
@@ -873,6 +930,7 @@ export class Board {
 
     private onKeyDown = (e: KeyboardEvent) => {
         const target = e.target as HTMLElement | null;
+        if (target?.closest('[role="dialog"], [role="menu"], button, select, a')) return;
         if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
             return;
         }

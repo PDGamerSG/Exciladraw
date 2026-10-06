@@ -50,7 +50,7 @@ export function Toolbar({
             role="toolbar"
             aria-label="Drawing tools"
             aria-orientation="horizontal"
-            className="panel pointer-events-auto flex items-center gap-0.5 rounded-xl p-1"
+            className="panel pointer-events-auto flex min-w-max items-center gap-0.5 rounded-xl p-1"
         >
             {TOOLS.map(({ tool, icon, label, digit, letter }) => {
                 const active = selectedTool === tool;

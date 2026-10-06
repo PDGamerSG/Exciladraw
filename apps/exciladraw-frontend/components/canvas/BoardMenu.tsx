@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Download, Keyboard, LogOut, Menu, Trash2 } from "lucide-react";
+import { useRef } from "react";
+import { ArrowLeft, Download, Keyboard, LogOut, Menu, Trash2, LayoutTemplate, FolderOpen, Save } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,23 +17,38 @@ const itemClass =
 
 export function BoardMenu({
     onExport,
+    onTemplates,
+    onImport,
+    onSave,
+    onSaveSelection,
+    canSaveSelection,
+    ready,
     onClearBoard,
     onShowShortcuts,
     onSignOut,
     canClear,
 }: {
     onExport: () => void;
+    onTemplates: () => void;
+    onImport: () => void;
+    onSave: () => void;
+    onSaveSelection: () => void;
+    canSaveSelection: boolean;
+    ready: boolean;
     onClearBoard: () => void;
     onShowShortcuts: () => void;
     onSignOut: () => void;
     canClear: boolean;
 }) {
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const pendingDialog = useRef<(() => void) | null>(null);
     return (
         <DropdownMenu>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DropdownMenuTrigger asChild>
                         <button
+                            ref={triggerRef}
                             type="button"
                             aria-label="Board menu"
                             className="panel pointer-events-auto flex h-9 w-9 items-center justify-center rounded-xl text-chalk-300 transition-colors duration-150 hover:text-chalk-100"
@@ -48,6 +64,14 @@ export function BoardMenu({
                 align="start"
                 sideOffset={8}
                 className="panel w-56 rounded-xl border-ink-700 bg-ink-850 p-1.5 text-chalk-100"
+                onCloseAutoFocus={(event) => {
+                    const openDialog = pendingDialog.current;
+                    if (!openDialog) return;
+                    event.preventDefault();
+                    pendingDialog.current = null;
+                    triggerRef.current?.focus();
+                    openDialog();
+                }}
             >
                 <DropdownMenuItem asChild className={itemClass}>
                     <Link href="/room">
@@ -55,11 +79,24 @@ export function BoardMenu({
                         Back to your boards
                     </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={onExport} className={itemClass}>
+                <DropdownMenuSeparator className="my-1.5 bg-ink-700" />
+                <DropdownMenuItem onSelect={() => { pendingDialog.current = onTemplates; }} disabled={!ready} className={itemClass}>
+                    <LayoutTemplate /> Browse templates
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onImport} disabled={!ready} className={itemClass}>
+                    <FolderOpen /> Import board file
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onSave} disabled={!ready || !canClear} className={itemClass}>
+                    <Save /> Save board file
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onSaveSelection} disabled={!ready || !canSaveSelection} className={itemClass}>
+                    <Save /> Save selection as file
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExport} disabled={!canClear} className={itemClass}>
                     <Download />
                     Export as PNG
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={onShowShortcuts} className={itemClass}>
+                <DropdownMenuItem onSelect={() => { pendingDialog.current = onShowShortcuts; }} className={itemClass}>
                     <Keyboard />
                     Keyboard shortcuts
                 </DropdownMenuItem>

@@ -1,4 +1,5 @@
-import { WebSocket, WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer, type RawData } from 'ws';
+import { createMessageQueue } from './messageQueue.js';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
 import { ClientMessageSchema } from '@repo/common/types';
@@ -141,7 +142,12 @@ wss.on('connection', async function connection(ws, request) {
     ws.close();
   });
 
-  ws.on('message', async function message(data) {
+  // A template insert followed immediately by undo must finish storing its
+  // shapes before the erase runs. Async event listeners alone race here.
+  const enqueue = createMessageQueue((error) => console.error("could not process board message", error));
+  ws.on('message', (data) => { void enqueue(() => message(data)); });
+
+  const message = async (data: RawData) => {
     let raw: unknown;
     try {
       raw = JSON.parse(typeof data === "string" ? data : data.toString());
@@ -257,7 +263,7 @@ wss.on('connection', async function connection(ws, request) {
 
       broadcast(roomId, { type: "erase", roomId, shapeIds: msg.shapeIds }, ws);
     }
-  });
+  };
 });
 
 function isUniqueViolation(e: unknown) {
