@@ -88,6 +88,7 @@ export function Canvas({
             onPeersChange: setPeers,
             onShapeCountChange: setShapeCount,
             onTextEdit: setTextEdit,
+            onNotice: (message, error) => setNotice({ message, error }),
             onLoad: (error) => {
                 setReady(!error);
                 if (error) setNotice({ message: error, error: true });
@@ -198,6 +199,21 @@ export function Canvas({
         }
     }
 
+    function exportSvg(selectionOnly = false) {
+        try {
+            const svg = boardRef.current?.toSvg(selectionOnly);
+            if (!svg) return;
+            const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${(roomName || `board-${roomId}`).replace(/[^\w-]+/g, "-")}${selectionOnly ? "-selection" : ""}.svg`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            setNotice({ message: error instanceof Error ? error.message : "Could not export this SVG.", error: true });
+        }
+    }
+
     async function importBoard(file: File) {
         const board = boardRef.current;
         if (!board) return;
@@ -292,6 +308,8 @@ export function Canvas({
                 <div className="pointer-events-none fixed inset-x-3 top-3 flex items-start justify-between gap-3 sm:inset-x-4 sm:top-4">
                     <BoardMenu
                         onExport={exportPng}
+                        onExportSvg={() => exportSvg()}
+                        onExportSelectionSvg={() => exportSvg(true)}
                         onTemplates={() => setTemplatesOpen(true)}
                         onImport={() => importRef.current?.click()}
                         onSave={() => saveBoard()}

@@ -8,6 +8,8 @@ const EDITING: [string, string][] = [
     ["Redo", "Ctrl ⇧ Z"],
     ["Select everything", "Ctrl A"],
     ["Duplicate selection", "Ctrl D"],
+    ["Copy / cut selection", "Ctrl C / X"],
+    ["Paste shapes or text", "Ctrl V"],
     ["Delete selection", "Delete"],
     ["Nudge selection", "Arrows"],
     ["Nudge further", "⇧ Arrows"],
@@ -49,6 +51,7 @@ export function ShortcutsDialog({ open, onClose }: { open: boolean; onClose: () 
             title="Keyboard shortcuts"
             className="max-w-2xl"
         >
+            <p className="mb-4 text-xs text-chalk-300">On Mac, use Command instead of Ctrl. Copy and paste work between boards.</p>
             <div className="grid max-h-[70vh] gap-6 overflow-y-auto pr-1 sm:grid-cols-2">
                 <Group title="Tools">
                     {TOOLS.map(({ label, digit, letter }) => (

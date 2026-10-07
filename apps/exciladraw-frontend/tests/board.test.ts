@@ -31,10 +31,13 @@ test("board inserts, syncs, arranges and undoes a large diagram as whole operati
     api.defaults.adapter = async (config) => ({ data: { messages: [{ id: 1, shapeId: existing.id, message: JSON.stringify({ shape: existing }) }] }, status: 200, statusText: "OK", headers: {}, config });
     const socket = new Socket();
     const peerSocket = new Socket();
+    const notices: { message: string; error: boolean }[] = [];
     let board!: Board, peer!: Board;
     try {
         await new Promise<void>((resolve) => {
-            board = new Board(new CanvasStub() as unknown as HTMLCanvasElement, "1", socket as unknown as WebSocket, { onLoad: () => resolve() });
+            board = new Board(new CanvasStub() as unknown as HTMLCanvasElement, "1", socket as unknown as WebSocket, {
+                onLoad: () => resolve(), onNotice: (message, error) => notices.push({ message, error }),
+            });
             assert.throws(() => board.insertShapes(BOARD_TEMPLATES[0]!.shapes), /finish loading/);
         });
         await new Promise<void>((resolve) => {
@@ -80,6 +83,49 @@ test("board inserts, syncs, arranges and undoes a large diagram as whole operati
         relay();
         socket.readyState = 3;
         assert.throws(() => board.insertShapes(BOARD_TEMPLATES[0]!.shapes), /Reconnect/);
+        socket.readyState = 1;
+        peer.destroy(); // Each browser window has one live board listening for clipboard events.
+        board.insertShapes(BOARD_TEMPLATES[0]!.shapes);
+        const beforeClipboard = board.toDocument();
+        let copied = "";
+        const clipboard = (type: string, text = copied, failWrite = false, field = false) => {
+            const event = new Event(type, { cancelable: true });
+            Object.defineProperty(event, "clipboardData", { value: {
+                files: [], getData: () => text,
+                setData: (_type: string, value: string) => { if (failWrite) throw new Error("Clipboard unavailable"); copied = value; },
+            } });
+            if (field) Object.defineProperty(event, "target", { value: { isContentEditable: true } });
+            window.dispatchEvent(event);
+            return event;
+        };
+        assert.equal(clipboard("copy").defaultPrevented, true);
+        assert.equal(parseDocument(copied).length, BOARD_TEMPLATES[0]!.shapes.length);
+        clipboard("cut", "", true);
+        assert.equal(board.toDocument(), beforeClipboard, "failed clipboard write must not delete shapes");
+        assert.equal(notices.at(-1)?.error, true);
+        socket.readyState = 3;
+        clipboard("cut");
+        assert.equal(board.toDocument(), beforeClipboard, "offline cut must not delete shapes");
+        socket.readyState = 1;
+        clipboard("cut");
+        assert.equal(parseDocument(board.toDocument()).length, parseDocument(beforeClipboard).length - BOARD_TEMPLATES[0]!.shapes.length);
+        board.undo();
+        assert.equal(board.toDocument(), beforeClipboard);
+        clipboard("paste");
+        const pasted = parseDocument(board.toDocument(true));
+        const sourceIds = new Set(parseDocument(copied).map((shape) => shape.id));
+        assert.ok(pasted.every((shape) => !sourceIds.has(shape.id)));
+        board.undo();
+        assert.equal(board.toDocument(), beforeClipboard);
+        clipboard("paste", "A new label\nSecond line");
+        const label = parseDocument(board.toDocument(true))[0]!;
+        assert.equal(label.type, "text");
+        if (label.type === "text") assert.equal(label.text, "A new label\nSecond line");
+        board.undo();
+        assert.equal(clipboard("paste", "Native field content", false, true).defaultPrevented, false);
+        clipboard("paste", JSON.stringify({ type: "exciladraw", version: 999 }));
+        assert.equal(board.toDocument(), beforeClipboard, "invalid clipboard diagrams leave the board intact");
+        assert.equal(notices.at(-1)?.error, true);
     } finally {
         board?.destroy();
         peer?.destroy();

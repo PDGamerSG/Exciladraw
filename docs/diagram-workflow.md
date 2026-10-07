@@ -43,7 +43,26 @@ normal live drawing messages. Update and erase messages are split by item count
 and byte size, and the WebSocket backend processes each connection's messages in
 order so an immediate undo follows the corresponding insert writes.
 
-## Interface contract
+## Clipboard and vector export
+
+- Select shapes and press **Ctrl+C** to copy or **Ctrl+X** to cut; on Mac use
+  **Command**. Paste with **Ctrl+V / Command+V** in this board or another board.
+  Pasting creates fresh IDs and is one undo step. Cutting also supports undo,
+  and a failed clipboard write or disconnected socket leaves the shapes intact.
+- Plain text pastes as an editable multiline label (up to 2,000 characters).
+  Text fields and dialogs keep their native clipboard behavior. Images and
+  other file clipboard contents are not imported.
+- Choose **Export board as SVG** or **Export selection as SVG** in the board
+  menu for a scalable vector image. All current shapes, colors, opacity, dashed
+  strokes, arrowheads, freehand curves and multiline labels are supported.
+  Exports keep the dark board background. Text uses the current font stack;
+  fonts are not embedded, so another app may use its fallback font.
+
+Clipboard shapes use the same versioned JSON format and validation limits as
+board files. Native clipboard events avoid requiring clipboard read permission.
+SVG is an image export; editable round trips still use `.exciladraw.json`.
+
+## Interface behavior
 
 The canvas stays the primary workspace. Templates live in a searchable dialog,
 file actions in the existing menu, and arrangement controls appear only for a
@@ -66,6 +85,10 @@ Tests cover template/schema validity, file round trips, malformed and oversized
 files, fresh IDs, all alignment directions, unequal-size distribution,
 insert/undo ordering, and two board instances replaying large edits through the
 shared WebSocket schema. Both item-count and byte-size batching are exercised.
+Clipboard tests exercise native event handling, copy/cut/paste with undo, fresh
+IDs, text-field isolation, invalid data, failed writes and offline cuts. SVG
+tests cover every shape, negative dimensions, styling, measured text bounds,
+multiline labels and XML escaping.
 
 Browser verification used an isolated in-memory HTTP/WebSocket fixture, without
 accessing the configured database: template search and empty results, insertion,
@@ -74,3 +97,12 @@ alignment/undo, menu-to-dialog focus, Tab/Shift+Tab trapping, Escape restoration
 and layout measurements at 320, 768, 1024, and 1440 pixels. Production database
 persistence was not exercised. The collaborative browser's screenshot tool
 failed, so visual screenshot review was unavailable.
+
+Clipboard/SVG follow-up verification used the same isolated backend: browser
+clipboard events copied and pasted a 12-shape diagram, pasted a multiline label,
+and cut/restored it with undo. Both SVG menu actions produced valid XML;
+selection export included only the selected label, special characters survived,
+and the full-board SVG loaded successfully as a browser image. All nine automated
+tests, frontend lint/type checks, and the production build passed in an isolated
+checkout. Database persistence and the operating-system clipboard were not
+exercised by these browser event checks.

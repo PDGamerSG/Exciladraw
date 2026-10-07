@@ -17,6 +17,8 @@ const itemClass =
 
 export function BoardMenu({
     onExport,
+    onExportSvg,
+    onExportSelectionSvg,
     onTemplates,
     onImport,
     onSave,
@@ -29,6 +31,8 @@ export function BoardMenu({
     canClear,
 }: {
     onExport: () => void;
+    onExportSvg: () => void;
+    onExportSelectionSvg: () => void;
     onTemplates: () => void;
     onImport: () => void;
     onSave: () => void;
@@ -63,7 +67,7 @@ export function BoardMenu({
             <DropdownMenuContent
                 align="start"
                 sideOffset={8}
-                className="panel w-56 rounded-xl border-ink-700 bg-ink-850 p-1.5 text-chalk-100"
+                className="panel max-h-[calc(100dvh-5rem)] w-56 overflow-y-auto rounded-xl border-ink-700 bg-ink-850 p-1.5 text-chalk-100"
                 onCloseAutoFocus={(event) => {
                     const openDialog = pendingDialog.current;
                     if (!openDialog) return;
@@ -95,6 +99,12 @@ export function BoardMenu({
                 <DropdownMenuItem onSelect={onExport} disabled={!canClear} className={itemClass}>
                     <Download />
                     Export as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportSvg} disabled={!ready || !canClear} className={itemClass}>
+                    <Download /> Export board as SVG
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onExportSelectionSvg} disabled={!ready || !canSaveSelection} className={itemClass}>
+                    <Download /> Export selection as SVG
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => { pendingDialog.current = onShowShortcuts; }} className={itemClass}>
                     <Keyboard />

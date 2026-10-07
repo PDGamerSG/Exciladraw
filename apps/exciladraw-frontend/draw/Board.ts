@@ -2,6 +2,8 @@ import { ShapeSchema } from "@repo/common/types";
 import { arrangeShapes, type Arrangement } from "./arrange";
 import { prepareInsertion, serializeDocument } from "./document";
 import { getExistingShapes } from "./http";
+import { isClipboardField, readClipboard } from "./clipboard";
+import { toSvg } from "./svg";
 import { boundsIntersect, boundsOf, hitTest, shapeBounds, translateShape } from "./geometry";
 import {
     BOARD_BACKGROUND,
@@ -59,6 +61,7 @@ export type BoardCallbacks = {
     onShapeCountChange?: (count: number) => void;
     onTextEdit?: (request: TextEditRequest | null) => void;
     onLoad?: (error?: string) => void;
+    onNotice?: (message: string, error: boolean) => void;
     /** Fires when a one-shot tool has finished, so the UI can fall back to select. */
     onToolFinished?: () => void;
 };
@@ -161,6 +164,9 @@ export class Board {
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
         window.addEventListener("blur", this.onWindowBlur);
+        window.addEventListener("copy", this.onCopy);
+        window.addEventListener("cut", this.onCut);
+        window.addEventListener("paste", this.onPaste);
         this.socket.addEventListener("message", this.onSocketMessage);
     }
 
@@ -176,6 +182,9 @@ export class Board {
         window.removeEventListener("keydown", this.onKeyDown);
         window.removeEventListener("keyup", this.onKeyUp);
         window.removeEventListener("blur", this.onWindowBlur);
+        window.removeEventListener("copy", this.onCopy);
+        window.removeEventListener("cut", this.onCut);
+        window.removeEventListener("paste", this.onPaste);
         this.socket.removeEventListener("message", this.onSocketMessage);
         if (this.frame !== null) cancelAnimationFrame(this.frame);
         if (this.cursorSweep !== null) clearInterval(this.cursorSweep);
@@ -356,6 +365,47 @@ export class Board {
         if (!this.loaded) throw new Error("Wait for the board to finish loading.");
         return serializeDocument(selectionOnly ? this.selectedShapes() : this.shapes);
     }
+
+    toSvg(selectionOnly = false) {
+        if (!this.loaded) throw new Error("Wait for the board to finish loading.");
+        return toSvg(selectionOnly ? this.selectedShapes() : this.shapes, {
+            fontFamily: getComputedStyle(this.canvas).fontFamily,
+            measureText: (text, size) => this.measureText(text, size),
+        });
+    }
+
+    private copyToClipboard(event: ClipboardEvent, cut: boolean) {
+        if (isClipboardField(event.target) || !event.clipboardData || !this.selected.size) return;
+        // A selected label in the surrounding UI should retain native copy.
+        if (window.getSelection?.()?.toString()) return;
+        event.preventDefault();
+        try {
+            if (cut && this.socket.readyState !== WebSocket.OPEN) throw new Error("Reconnect before cutting shapes.");
+            const text = this.toDocument(true);
+            event.clipboardData.setData("text/plain", text);
+            if (cut) this.deleteSelection();
+            this.callbacks.onNotice?.(cut ? "Selection cut. Paste it into any board, or undo to restore it." : "Selection copied. Paste it into any board.", false);
+        } catch (error) {
+            this.callbacks.onNotice?.(error instanceof Error ? error.message : "Could not copy the selection.", true);
+        }
+    }
+
+    private onCopy = (event: ClipboardEvent) => this.copyToClipboard(event, false);
+    private onCut = (event: ClipboardEvent) => this.copyToClipboard(event, true);
+    private onPaste = (event: ClipboardEvent) => {
+        if (isClipboardField(event.target) || !event.clipboardData || event.clipboardData.files.length) return;
+        const text = event.clipboardData.getData("text/plain");
+        if (!text.trim()) return;
+        event.preventDefault();
+        try {
+            const shapes = readClipboard(text);
+            this.insertShapes(shapes);
+            this.callbacks.onToolFinished?.();
+            this.callbacks.onNotice?.(`Pasted ${shapes.length} ${shapes.length === 1 ? "shape" : "shapes"}. Undo removes this paste.`, false);
+        } catch (error) {
+            this.callbacks.onNotice?.(error instanceof Error ? error.message : "Could not paste this content.", true);
+        }
+    };
 
     arrangeSelection(action: Arrangement) {
         const before = this.selectedShapes();

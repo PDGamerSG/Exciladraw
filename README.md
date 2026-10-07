@@ -9,6 +9,9 @@ Start with four editable templates, align and distribute selected shapes, and
 save a board or selection as an editable file to reuse in another room. Open the
 board menu for **Browse templates**, **Import board file**, and **Save board file**.
 Inserts and arrangement changes support undo/redo and live collaboration.
+Copy, cut, and paste shapes between boards with Ctrl/Cmd+C, X, and V, or paste
+plain text as an editable label. Export the whole board or selection as SVG from
+the board menu for diagrams that stay sharp at any size.
 
 See [the diagram workflow guide](docs/diagram-workflow.md) for usage, file limits,
 project references, and verification details.
