@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeControl } from "@/components/ThemeControl";
 import { Wordmark } from "@/components/Wordmark";
+import { AuthLandscape } from "@/components/AuthLandscape";
 
 /** Only same-origin paths are followed, so ?next= cannot bounce you offsite. */
 function safeNext(next: string | null) {
@@ -56,7 +57,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
     const passwordHint = isSignin ? undefined : "At least 6 characters.";
 
     return (
-        <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-5 py-16">
+        <main className="relative flex min-h-screen w-full items-center justify-center px-5 pb-10 pt-20 sm:px-8 lg:py-24">
 
             <div className="absolute right-5 top-5"><ThemeControl /></div>
             <Link
@@ -67,107 +68,110 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                 Back to home
             </Link>
 
-            <div className="rise relative w-full max-w-[380px]">
-                <div className="mb-8 flex flex-col items-start gap-8">
-                    <Wordmark />
-                    <div>
-                        <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100">
-                            {isSignin ? "Welcome back" : "Create your account"}
-                        </h1>
-                        <p className="mt-2 text-sm text-chalk-500">
-                            {isSignin
-                                ? "Sign in to pick up where your team left off."
-                                : "A place to draw, think, and work together."}
-                        </p>
+            <div className="grid w-full max-w-[1180px] gap-9 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
+                <AuthLandscape />
+                <div className="relative mx-auto w-full max-w-[380px] py-2 lg:py-10">
+                    <div className="mb-8 flex flex-col items-start gap-8">
+                        <Wordmark />
+                        <div>
+                            <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100">
+                                {isSignin ? "Welcome back" : "Create your account"}
+                            </h1>
+                            <p className="mt-2 text-sm text-chalk-500">
+                                {isSignin
+                                    ? "Sign in to pick up where your team left off."
+                                    : "A place to draw, think, and work together."}
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex flex-col gap-5"
-                    noValidate
-                >
-                    {!isSignin && (
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex flex-col gap-5"
+                        noValidate
+                    >
+                        {!isSignin && (
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="name" className="eyebrow">Name</Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    autoComplete="name"
+                                    placeholder="Ada Lovelace"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-2">
-                            <Label htmlFor="name" className="eyebrow">Name</Label>
+                            <Label htmlFor="email" className="eyebrow">Email</Label>
                             <Input
-                                id="name"
-                                name="name"
-                                type="text"
-                                autoComplete="name"
-                                placeholder="Ada Lovelace"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                id="email"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                placeholder="you@example.com"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                             />
                         </div>
-                    )}
 
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="email" className="eyebrow">Email</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            placeholder="you@example.com"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
+                        <div className="flex flex-col gap-2">
+                            <Label htmlFor="password" className="eyebrow">Password</Label>
+                            <Input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autoComplete={isSignin ? "current-password" : "new-password"}
+                                placeholder="••••••••"
+                                minLength={isSignin ? undefined : 6}
+                                aria-describedby={passwordHint ? "password-hint" : undefined}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                            {passwordHint && (
+                                <p id="password-hint" className="text-xs text-chalk-500">
+                                    {passwordHint}
+                                </p>
+                            )}
+                        </div>
 
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor="password" className="eyebrow">Password</Label>
-                        <Input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete={isSignin ? "current-password" : "new-password"}
-                            placeholder="••••••••"
-                            minLength={isSignin ? undefined : 6}
-                            aria-describedby={passwordHint ? "password-hint" : undefined}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        {passwordHint && (
-                            <p id="password-hint" className="text-xs text-chalk-500">
-                                {passwordHint}
+                        {error && (
+                            <p
+                                role="alert"
+                                className="rounded-lg border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-destructive"
+                            >
+                                {error}
                             </p>
                         )}
-                    </div>
 
-                    {error && (
-                        <p
-                            role="alert"
-                            className="rounded-lg border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-destructive"
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {error}
-                        </p>
-                    )}
+                            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {loading
+                                ? isSignin ? "Signing in…" : "Creating your account…"
+                                : isSignin ? "Sign in" : "Create account"}
+                        </button>
+                    </form>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {loading
-                            ? isSignin ? "Signing in…" : "Creating your account…"
-                            : isSignin ? "Sign in" : "Create account"}
-                    </button>
-                </form>
-
-                <p className="mt-6 text-center text-[13px] text-chalk-500">
-                    {isSignin ? "No account yet? " : "Already have an account? "}
-                    <Link
-                        href={isSignin ? "/signup" : "/signin"}
-                        className="text-chalk-100 underline decoration-ink-600 underline-offset-4 transition-colors hover:decoration-amber-400"
-                    >
-                        {isSignin ? "Create one" : "Sign in"}
-                    </Link>
-                </p>
+                    <p className="mt-6 text-center text-[13px] text-chalk-500">
+                        {isSignin ? "No account yet? " : "Already have an account? "}
+                        <Link
+                            href={isSignin ? "/signup" : "/signin"}
+                            className="text-chalk-100 underline decoration-ink-600 underline-offset-4 transition-colors hover:decoration-amber-400"
+                        >
+                            {isSignin ? "Create one" : "Sign in"}
+                        </Link>
+                    </p>
+                </div>
             </div>
         </main>
     );

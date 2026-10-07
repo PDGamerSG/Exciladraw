@@ -11,6 +11,7 @@ import {
 import { prismaClient } from "@repo/db/client";
 import cors from "cors";
 import bcrypt from "bcrypt";
+import { changePassword } from "./password";
 
 const app = express();
 
@@ -94,6 +95,19 @@ app.post("/signin", authLimiter, route(async (req, res) => {
 
     res.json({ token: signToken(user.id), name: user.name });
 }));
+
+app.post("/me/password", middleware, authLimiter, route(changePassword({
+    findHash: async (userId) => {
+        const user = await prismaClient.user.findUnique({ where: { id: userId }, select: { password: true } });
+        return user?.password ?? null;
+    },
+    replaceHash: async (userId, previousHash, nextHash) => {
+        const result = await prismaClient.user.updateMany({
+            where: { id: userId, password: previousHash }, data: { password: nextHash },
+        });
+        return result.count === 1;
+    },
+})));
 
 app.get("/me", middleware, route(async (req, res) => {
     const user = await prismaClient.user.findUnique({

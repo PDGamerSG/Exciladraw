@@ -177,6 +177,39 @@
 }
 
 @layer components {
+  .auth-landscape {
+    --scene-sky: #dcece8;
+    --scene-line: #547f7b;
+    --scene-sun: #edaa69;
+    --scene-mountain: #87aaa9;
+    --scene-snow: #e8f1e8;
+    --scene-far: #648d76;
+    --scene-meadow: #aac291;
+    --scene-water: #bce1d9;
+    --scene-ripple: #78b4ad;
+    --scene-near: #3f745e;
+    --scene-tree: #285544;
+    --scene-house: #f2bc79;
+    --scene-grass: #a2c39b;
+    --scene-caption: #eef5e8;
+    background: var(--scene-sky);
+    color: #2b5149;
+  }
+  .dark .auth-landscape {
+    --scene-sky: #253e48;
+    --scene-line: #a5c3c3;
+    --scene-sun: #ecad7a;
+    --scene-mountain: #4e6b78;
+    --scene-snow: #a5bdbe;
+    --scene-far: #426b68;
+    --scene-meadow: #789776;
+    --scene-water: #8ac2c0;
+    --scene-ripple: #497e89;
+    --scene-near: #244e48;
+    --scene-tree: #193e38;
+    --scene-grass: #7ea28a;
+    color: #e5eee5;
+  }
   .panel {
     background: var(--ink-850);
     border: 1px solid var(--ink-700);

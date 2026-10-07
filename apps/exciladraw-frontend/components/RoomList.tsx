@@ -11,12 +11,14 @@ import {
     Share2,
     Trash2,
     Users,
+    KeyRound,
 } from "lucide-react";
 import { api, clearToken, errorMessage, getToken, isAuthError } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { ShareDialog } from "@/components/canvas/ShareDialog";
 import { ThemeControl } from "@/components/ThemeControl";
+import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { Wordmark } from "@/components/Wordmark";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -43,6 +45,8 @@ export function RoomList() {
     const [sharing, setSharing] = useState<Room | null>(null);
     const [confirming, setConfirming] = useState<Room | null>(null);
     const [removing, setRemoving] = useState(false);
+    const [passwordOpen, setPasswordOpen] = useState(false);
+    const closePassword = useCallback(() => setPasswordOpen(false), []);
 
     const signOut = useCallback(() => {
         clearToken();
@@ -115,13 +119,19 @@ export function RoomList() {
                         <Wordmark />
                         <div className="flex items-center gap-2">
                             <ThemeControl />
+                            <button type="button" onClick={() => setPasswordOpen(true)} aria-label="Change password" title="Change password"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-chalk-500 hover:bg-ink-850 hover:text-chalk-100 sm:w-auto sm:gap-2 sm:px-3">
+                                <KeyRound className="h-4 w-4" />
+                                <span className="hidden text-[13px] sm:inline">Password</span>
+                            </button>
                             <button
                                 type="button"
+                                aria-label="Sign out"
                                 onClick={signOut}
                                 className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100"
                             >
                                 <LogOut className="h-3.5 w-3.5" />
-                                Sign out
+                                <span className="hidden sm:inline">Sign out</span>
                             </button>
                         </div>
                     </header>
@@ -264,6 +274,7 @@ export function RoomList() {
                     </section>
                 </div>
 
+                {passwordOpen && <ChangePasswordDialog onClose={closePassword} />}
                 <ShareDialog
                     open={sharing !== null}
                     onClose={() => setSharing(null)}

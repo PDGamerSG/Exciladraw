@@ -16,6 +16,13 @@ export const SigninSchema = z.object({
     password: z.string()
 })
 
+export const ChangePasswordSchema = z.object({
+    currentPassword: z.string().min(1).max(100),
+    newPassword: z.string().min(12, "Use at least 12 characters for your new password.")
+        .max(72, "Keep your new password within 72 bytes.")
+        .refine((value) => new TextEncoder().encode(value).length <= 72, "Keep your new password within 72 bytes."),
+});
+
 export const CreateRoomSchema = z.object({
     name: z.string().trim().min(3).max(20)
 })

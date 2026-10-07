@@ -154,3 +154,19 @@ pnpm lint
 
 Both backends expose `GET /health`, which returns `{"status":"ok"}` — handy for uptime
 pings on platforms that sleep idle services.
+
+## Changing a password
+
+On **Your boards**, choose **Password** (the key icon on mobile). Enter your
+current password and a unique replacement of at least 12 characters, then update
+the saved entry in your browser's password manager. The change preserves your
+account and boards. It requires the frontend and HTTP backend to be deployed
+together; no database migration is needed.
+
+A browser warning saying a password was found in a data breach comes from the
+browser's password manager. It does not mean login failed or establish that this
+application's database was breached. Replace the flagged password rather than
+disabling the warning.
+
+Run password endpoint tests with `pnpm --filter http-backend test`. They use an
+isolated in-memory account store and do not connect to the application database.
