@@ -4,7 +4,7 @@ export type BoardTheme = "light" | "dark";
 
 export const BOARD_PALETTES = {
     light: { background: "#faf9f6", grid: "rgba(45,42,36,0.055)", majorGrid: "rgba(45,42,36,0.1)", accent: "#97612b" },
-    dark: { background: "#181a1b", grid: "rgba(255,255,255,0.04)", majorGrid: "rgba(255,255,255,0.075)", accent: "#dfb783" },
+    dark: { background: "#121212", grid: "rgba(255,255,255,0.04)", majorGrid: "rgba(255,255,255,0.075)", accent: "#ffb35c" },
 } as const;
 
 // Stored inks stay stable across collaborators and file round-trips. Only the

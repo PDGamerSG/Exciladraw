@@ -53,29 +53,29 @@
 
 :root.dark {
   color-scheme: dark;
-  --ink-950: #181a1b;
-  --ink-900: #1e2021;
-  --ink-850: #252728;
-  --ink-800: #2d3031;
-  --ink-750: #383b3c;
-  --ink-700: #434747;
-  --ink-600: #606565;
-  --chalk-100: #efefea;
-  --chalk-300: #c2c5bf;
-  --chalk-500: #9ca29c;
-  --amber-300: #edc99b;
-  --amber-400: #dfb783;
-  --amber-500: #cba16c;
+  --ink-950: #0b0d12;
+  --ink-900: #101219;
+  --ink-850: #14171f;
+  --ink-800: #1a1d27;
+  --ink-750: #222632;
+  --ink-700: #2b303d;
+  --ink-600: #3a4051;
+  --chalk-100: #eef1f7;
+  --chalk-300: #b4bbcb;
+  --chalk-500: #929bb0;
+  --amber-300: #ffc580;
+  --amber-400: #ffb35c;
+  --amber-500: #ff9d33;
   --pen-graphite: #e3e7f0;
   --pen-red: #ff6b6b;
   --pen-green: #4ade80;
   --pen-blue: #60a5fa;
   --pen-amber: #fbbf24;
   --pen-violet: #a78bfa;
-  --board: #181a1b;
-  --primary: #c8d5c6;
-  --primary-hover: #dae5d8;
-  --primary-foreground: #253029;
+  --board: #121212;
+  --primary: #ffb35c;
+  --primary-hover: #ffc580;
+  --primary-foreground: #0b0d12;
   --destructive: #f09286;
   --destructive-foreground: #261513;
   --panel-shadow: 0 2px 10px rgb(0 0 0 / 0.2);
@@ -177,47 +177,12 @@
 }
 
 @layer components {
-  .auth-scenery-photo {
-    filter: saturate(1.12);
-  }
-  .auth-scenery-shade {
-    background: linear-gradient(90deg, rgb(13 29 24 / 0.58), rgb(13 29 24 / 0.12) 64%),
-      linear-gradient(0deg, rgb(10 23 18 / 0.6), transparent 55%, rgb(10 23 18 / 0.25));
-  }
-  .dark .auth-scenery-photo {
-    filter: saturate(0.95) brightness(0.8);
-  }
   .auth-form {
-    background: #f6f5ed;
-    color: var(--chalk-100);
-    box-shadow: 0 24px 80px rgb(8 20 15 / 0.22);
-  }
-  .dark .auth-form {
-    background: #1c2521;
-    --ink-900: #253029;
-    --ink-700: #4b5d50;
+    background: var(--ink-850);
+    box-shadow: var(--panel-shadow);
   }
   .auth-form input {
-    border-radius: 4px;
     height: 46px;
-  }
-  .auth-submit {
-    background: #d8ed89;
-    color: #22301a;
-    border: 1px solid #354628;
-    box-shadow: 3px 3px 0 #354628;
-  }
-  .auth-submit:hover {
-    background: #e5f4af;
-  }
-  .auth-submit:active {
-    transform: translate(1px, 1px);
-    box-shadow: 2px 2px 0 #354628;
-  }
-  @media (max-width: 1023px) {
-    .auth-scenery-shade {
-      background: linear-gradient(180deg, rgb(13 29 24 / 0.6), rgb(13 29 24 / 0.1) 60%, rgb(13 29 24 / 0.4));
-    }
   }
   .panel {
     background: var(--ink-850);

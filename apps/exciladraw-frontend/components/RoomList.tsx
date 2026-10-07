@@ -115,7 +115,7 @@ export function RoomList() {
             <div className="relative min-h-screen">
 
                 <div className="relative mx-auto w-full max-w-4xl px-5 py-6 sm:px-8">
-                    <header className="flex items-center justify-between border-b border-ink-700/70 pb-6">
+                    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700/70 pb-6">
                         <Wordmark />
                         <div className="flex items-center gap-2">
                             <ThemeControl />

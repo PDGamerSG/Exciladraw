@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // the canvas fills the window, so a pinch-zoom of the page itself would
   // fight the board's own zoom
-  themeColor: '#f6f5f1',
+  themeColor: '#0b0d12',
   colorScheme: 'light dark',
   width: 'device-width',
   initialScale: 1,
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var p='system';try{p=localStorage.getItem('exciladraw-theme')||p}catch(e){}var d=p==='dark'||(p!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.dataset.theme=d?'dark':'light'})()` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var p='dark';try{p=localStorage.getItem('exciladraw-theme')||p}catch(e){}var d=p!=='light'&&(p!=='system'||matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.dataset.theme=d?'dark':'light'})()` }} />
       </head>
       <body className={`${inter.className} bg-ink-950 text-chalk-100`}>{children}</body>
     </html>

@@ -65,7 +65,7 @@ test("board inserts, syncs, arranges and undoes a large diagram as whole operati
         assert.equal(socket.sent.length, 0, "appearance is local to each collaborator");
         assert.match(board.toSvg()!, /fill="#faf9f6"/);
         board.setTheme("dark");
-        assert.match(board.toSvg()!, /fill="#181a1b"/);
+        assert.match(board.toSvg()!, /fill="#121212"/);
         board.arrangeSelection("top");
         assert.equal(socket.sent.length, 3, "large updates are split into protocol-sized frames");
         relay();

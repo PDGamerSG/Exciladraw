@@ -12,9 +12,9 @@ function preference(): ThemePreference {
     if (memoryPreference) return memoryPreference;
     try {
         const saved = localStorage.getItem(KEY);
-        if (saved === "light" || saved === "dark") return saved;
+        if (saved === "light" || saved === "dark" || saved === "system") return saved;
     } catch { /* Storage can be blocked; appearance still works for this visit. */ }
-    return "system";
+    return "dark";
 }
 
 function snapshot() {
@@ -27,7 +27,7 @@ function apply() {
     const theme = snapshot().split(":")[1]!;
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#181a1b" : "#f6f5f1");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0b0d12" : "#f6f5f1");
 }
 
 function subscribe(onChange: () => void) {
@@ -55,7 +55,7 @@ export function setThemePreference(value: ThemePreference) {
 }
 
 export function useTheme() {
-    const value = useSyncExternalStore(subscribe, snapshot, () => "system:light");
+    const value = useSyncExternalStore(subscribe, snapshot, () => "dark:dark");
     const [preference, theme] = value.split(":") as [ThemePreference, BoardTheme];
     return { preference, theme, setPreference: setThemePreference };
 }
