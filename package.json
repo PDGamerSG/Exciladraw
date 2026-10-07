@@ -4,6 +4,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "db:deploy": "pnpm --filter @repo/db exec prisma migrate deploy",
+    "db:status": "pnpm --filter @repo/db exec prisma migrate status",
+    "db:generate": "pnpm --filter @repo/db exec prisma generate",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

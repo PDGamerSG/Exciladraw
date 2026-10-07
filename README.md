@@ -111,6 +111,28 @@ By default:
 
 ## Build
 
+When deploying an update, apply pending database migrations before starting the
+new backends. Building the app or generating Prisma Client does not update the
+database schema:
+
+```sh
+pnpm db:deploy
+pnpm db:generate
+pnpm db:status
+```
+
+Set `DATABASE_URL` for the target database in the deployment environment (or in
+`packages/db/.env` locally). Use `pnpm db:deploy` as the hosting service's
+pre-deploy/release command and `pnpm db:generate` before building the backends.
+The migration command is safe to run again after migrations have been applied.
+
+If sign-in succeeds but the boards page says **Something went wrong**, check
+`pnpm db:status` and the backend logs. The board API requires the
+`20260830090000_room_membership_and_shape_ids` migration. It adds invite codes,
+memberships for existing board owners, and IDs for existing drawing records;
+it preserves accounts and drawings. Apply it with `pnpm db:deploy`, rather than
+resetting the database or recreating the account.
+
 ```sh
 pnpm build
 ```
