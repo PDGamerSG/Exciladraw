@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Loader2 } from "lucide-react";
 import { api, errorMessage, setToken } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,21 +57,33 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
     const passwordHint = isSignin ? undefined : "At least 6 characters.";
 
     return (
-        <main className="relative flex min-h-screen w-full items-center justify-center px-5 pb-10 pt-20 sm:px-8 lg:py-24">
+        <main className="relative isolate flex min-h-svh flex-col bg-[#24382b]">
+            <AuthLandscape />
+            <header className="relative z-10 mx-auto flex w-full max-w-[1600px] items-center justify-between px-5 py-5 sm:px-9 lg:px-14 lg:py-7">
+                <Link href="/" className="inline-flex min-h-10 items-center gap-2 rounded px-2 text-sm text-[#f7f7ec] transition-colors hover:bg-black/20">
+                    <ArrowLeft className="h-4 w-4" aria-hidden /> Back to home
+                </Link>
+                <ThemeControl />
+            </header>
 
-            <div className="absolute right-5 top-5"><ThemeControl /></div>
-            <Link
-                href="/"
-                className="absolute left-4 top-4 inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100 sm:left-6 sm:top-6"
-            >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Back to home
-            </Link>
-
-            <div className="grid w-full max-w-[1180px] gap-9 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:gap-16">
-                <AuthLandscape />
-                <div className="relative mx-auto w-full max-w-[380px] py-2 lg:py-10">
-                    <div className="mb-8 flex flex-col items-start gap-8">
+            <div className="relative z-10 mx-auto grid w-full max-w-[1600px] flex-1 gap-8 px-5 pb-10 pt-5 sm:px-9 lg:grid-cols-[1fr_440px] lg:items-center lg:gap-16 lg:px-14 lg:pb-16 lg:pt-7 xl:grid-cols-[1fr_460px]">
+                <section aria-label="Space for your ideas" className="py-1 text-[#f7f7ec] lg:py-14">
+                    <p className="mb-5 font-mono text-[11px] tracking-[0.08em] sm:text-xs">A SHARED CANVAS. AN OPEN MIND.</p>
+                    <p className="max-w-[760px] text-[clamp(3.2rem,7.6vw,8rem)] font-semibold leading-[0.96] tracking-[-0.065em]">
+                        Room to<br className="hidden lg:block" /> think <span className="relative inline-block text-[#d8ed89]">out loud.
+                            <svg viewBox="0 0 500 28" preserveAspectRatio="none" className="absolute -bottom-3 left-0 h-5 w-full sm:-bottom-5 sm:h-7" aria-hidden="true">
+                                <path d="M5 17Q202-2 489 9M42 25Q253 12 455 19" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                            </svg>
+                        </span>
+                    </p>
+                    <p className="mt-8 max-w-[350px] text-sm leading-relaxed text-[#f7f7ec] sm:mt-10 sm:text-base">Big plans. Rough sketches. Happy accidents.<br />Give your next idea somewhere to go.</p>
+                    <div className="mt-10 hidden items-center gap-3 lg:flex">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#f7f7ec]/60"><ArrowUpRight className="h-4 w-4" aria-hidden /></span>
+                        <span className="text-xs text-[#f7f7ec]">Draw freely. Figure it out together.</span>
+                    </div>
+                </section>
+                <div className="auth-form relative mx-auto w-full max-w-[460px] rounded-lg border border-white/15 px-6 py-8 sm:px-9 sm:py-10">
+                    <div className="mb-7 flex flex-col items-start gap-7">
                         <Wordmark />
                         <div>
                             <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100">
@@ -153,7 +165,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                            className="auth-submit mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                             {loading
@@ -173,6 +185,10 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                     </p>
                 </div>
             </div>
+            <footer className="relative z-10 flex flex-wrap items-center justify-between gap-3 px-7 pb-5 text-[11px] text-[#f7f7ec] sm:px-11 lg:px-16">
+                <span>Exciladraw · A little room for your next big idea.</span>
+                <a href="https://unsplash.com/photos/78A265wPiO4" target="_blank" rel="noreferrer" className="underline decoration-white/50 underline-offset-4 hover:decoration-white">Photo: David Marcu / Unsplash</a>
+            </footer>
         </main>
     );
 }

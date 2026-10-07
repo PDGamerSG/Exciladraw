@@ -177,38 +177,47 @@
 }
 
 @layer components {
-  .auth-landscape {
-    --scene-sky: #dcece8;
-    --scene-line: #547f7b;
-    --scene-sun: #edaa69;
-    --scene-mountain: #87aaa9;
-    --scene-snow: #e8f1e8;
-    --scene-far: #648d76;
-    --scene-meadow: #aac291;
-    --scene-water: #bce1d9;
-    --scene-ripple: #78b4ad;
-    --scene-near: #3f745e;
-    --scene-tree: #285544;
-    --scene-house: #f2bc79;
-    --scene-grass: #a2c39b;
-    --scene-caption: #eef5e8;
-    background: var(--scene-sky);
-    color: #2b5149;
+  .auth-scenery-photo {
+    filter: saturate(1.12);
   }
-  .dark .auth-landscape {
-    --scene-sky: #253e48;
-    --scene-line: #a5c3c3;
-    --scene-sun: #ecad7a;
-    --scene-mountain: #4e6b78;
-    --scene-snow: #a5bdbe;
-    --scene-far: #426b68;
-    --scene-meadow: #789776;
-    --scene-water: #8ac2c0;
-    --scene-ripple: #497e89;
-    --scene-near: #244e48;
-    --scene-tree: #193e38;
-    --scene-grass: #7ea28a;
-    color: #e5eee5;
+  .auth-scenery-shade {
+    background: linear-gradient(90deg, rgb(13 29 24 / 0.58), rgb(13 29 24 / 0.12) 64%),
+      linear-gradient(0deg, rgb(10 23 18 / 0.6), transparent 55%, rgb(10 23 18 / 0.25));
+  }
+  .dark .auth-scenery-photo {
+    filter: saturate(0.95) brightness(0.8);
+  }
+  .auth-form {
+    background: #f6f5ed;
+    color: var(--chalk-100);
+    box-shadow: 0 24px 80px rgb(8 20 15 / 0.22);
+  }
+  .dark .auth-form {
+    background: #1c2521;
+    --ink-900: #253029;
+    --ink-700: #4b5d50;
+  }
+  .auth-form input {
+    border-radius: 4px;
+    height: 46px;
+  }
+  .auth-submit {
+    background: #d8ed89;
+    color: #22301a;
+    border: 1px solid #354628;
+    box-shadow: 3px 3px 0 #354628;
+  }
+  .auth-submit:hover {
+    background: #e5f4af;
+  }
+  .auth-submit:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 #354628;
+  }
+  @media (max-width: 1023px) {
+    .auth-scenery-shade {
+      background: linear-gradient(180deg, rgb(13 29 24 / 0.6), rgb(13 29 24 / 0.1) 60%, rgb(13 29 24 / 0.4));
+    }
   }
   .panel {
     background: var(--ink-850);
