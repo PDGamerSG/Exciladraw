@@ -1,12 +1,6 @@
+import { BOARD_PALETTES, displayStyle, displayColor, type BoardTheme } from "./theme";
 import { shapeBounds } from "./geometry";
 import { DEFAULT_STYLE, type Bounds, type LegacyShapeFields, type Shape, type ShapeStyle } from "./types";
-
-export const BOARD_BACKGROUND = "#121212";
-const GRID_COLOR = "rgba(255,255,255,0.055)";
-const GRID_COLOR_MAJOR = "rgba(255,255,255,0.09)";
-// selection chrome is the interface amber, deliberately lighter and warmer
-// than the amber pen so an amber-stroked shape still reads as selected
-export const ACCENT = "#ffb35c";
 
 /** Grid spacings we step through as you zoom, so lines never crowd together. */
 const GRID_STEPS = [10, 20, 50, 100, 250, 500, 1000, 2500];
@@ -20,7 +14,8 @@ function gridSpacing(zoom: number) {
 export function drawGrid(
     ctx: CanvasRenderingContext2D,
     viewport: Bounds,
-    zoom: number
+    zoom: number,
+    theme: BoardTheme = "dark"
 ) {
     const spacing = gridSpacing(zoom);
     const startX = Math.floor(viewport.minX / spacing) * spacing;
@@ -34,7 +29,7 @@ export function drawGrid(
     // every fifth line is drawn brighter, which keeps a sense of scale while
     // panning without needing a second, denser grid
     for (const major of [false, true]) {
-        ctx.strokeStyle = major ? GRID_COLOR_MAJOR : GRID_COLOR;
+        ctx.strokeStyle = major ? BOARD_PALETTES[theme].majorGrid : BOARD_PALETTES[theme].grid;
         ctx.beginPath();
         for (let x = startX; x <= viewport.maxX; x += spacing) {
             if ((Math.round(x / spacing) % 5 === 0) !== major) continue;
@@ -139,8 +134,8 @@ export function fontFor(fontSize: number) {
     return `${fontSize}px ${fontFamily}`;
 }
 
-export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
-    const style: ShapeStyle = { ...DEFAULT_STYLE, ...(shape.style ?? {}) };
+export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape, theme: BoardTheme = "dark") {
+    const style = displayStyle({ ...DEFAULT_STYLE, ...(shape.style ?? {}) }, theme);
     const legacy = shape as unknown as LegacyShapeFields;
 
     ctx.save();
@@ -235,7 +230,8 @@ export function drawShape(ctx: CanvasRenderingContext2D, shape: Shape) {
 export function drawSelection(
     ctx: CanvasRenderingContext2D,
     shapes: Shape[],
-    zoom: number
+    zoom: number,
+    theme: BoardTheme = "dark"
 ) {
     if (!shapes.length) return;
     const pad = 6 / zoom;
@@ -243,7 +239,7 @@ export function drawSelection(
     ctx.save();
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = ACCENT;
+    ctx.strokeStyle = BOARD_PALETTES[theme].accent;
     ctx.lineWidth = 1 / zoom;
 
     // an outline per shape reads better than one box when several are selected
@@ -269,7 +265,7 @@ export function drawSelection(
     ctx.strokeRect(x, y, w, h);
 
     const handle = 4 / zoom;
-    ctx.fillStyle = BOARD_BACKGROUND;
+    ctx.fillStyle = BOARD_PALETTES[theme].background;
     for (const [hx, hy] of [[x, y], [x + w, y], [x, y + h], [x + w, y + h]] as const) {
         ctx.beginPath();
         ctx.rect(hx - handle, hy - handle, handle * 2, handle * 2);
@@ -280,12 +276,12 @@ export function drawSelection(
 }
 
 /** The translucent rectangle dragged out to select several shapes at once. */
-export function drawMarquee(ctx: CanvasRenderingContext2D, box: Bounds, zoom: number) {
+export function drawMarquee(ctx: CanvasRenderingContext2D, box: Bounds, zoom: number, theme: BoardTheme = "dark") {
     ctx.save();
     ctx.globalAlpha = 1;
     ctx.setLineDash([]);
-    ctx.fillStyle = "rgba(255,179,92,0.09)";
-    ctx.strokeStyle = "rgba(255,179,92,0.55)";
+    ctx.fillStyle = `${BOARD_PALETTES[theme].accent}18`;
+    ctx.strokeStyle = BOARD_PALETTES[theme].accent;
     ctx.lineWidth = 1 / zoom;
     const w = box.maxX - box.minX;
     const h = box.maxY - box.minY;
@@ -314,7 +310,8 @@ export function drawCursor(
     x: number, y: number,
     name: string,
     color: string,
-    zoom: number
+    zoom: number,
+    theme: BoardTheme = "dark"
 ) {
     const s = 1 / zoom;
     ctx.save();
@@ -329,8 +326,8 @@ export function drawCursor(
     ctx.lineTo(4.4, 12.8);
     ctx.lineTo(10.5, 12.2);
     ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.strokeStyle = BOARD_BACKGROUND;
+    ctx.fillStyle = displayColor(color, theme);
+    ctx.strokeStyle = BOARD_PALETTES[theme].background;
     ctx.lineWidth = 1.5;
     ctx.stroke();
     ctx.fill();
@@ -340,11 +337,11 @@ export function drawCursor(
         ctx.textBaseline = "top";
         const label = name.length > 18 ? `${name.slice(0, 17)}…` : name;
         const width = ctx.measureText(label).width;
-        ctx.fillStyle = color;
+        ctx.fillStyle = displayColor(color, theme);
         ctx.beginPath();
         ctx.roundRect(11, 15, width + 12, 19, 6);
         ctx.fill();
-        ctx.fillStyle = BOARD_BACKGROUND;
+        ctx.fillStyle = BOARD_PALETTES[theme].background;
         ctx.fillText(label, 17, 19);
     }
     ctx.restore();

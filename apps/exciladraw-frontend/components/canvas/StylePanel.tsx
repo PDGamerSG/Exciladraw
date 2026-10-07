@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "@/lib/theme";
+import { displayColor } from "@/draw/theme";
 import { cn } from "@/lib/utils";
 import type { ShapeStyle } from "@/draw/types";
 
@@ -63,6 +65,7 @@ function Swatch({
     selected: boolean;
     onClick: () => void;
 }) {
+    const { theme } = useTheme();
     const isNone = color === "transparent";
     return (
         <button
@@ -73,10 +76,10 @@ function Swatch({
             aria-pressed={selected}
             className={cn(
                 "relative h-6 w-6 rounded-md border transition-transform duration-150",
-                "border-white/10 hover:scale-110",
+                "border-ink-600/40 hover:scale-110",
                 selected && "scale-110 border-amber-400 ring-2 ring-amber-400/35"
             )}
-            style={isNone ? undefined : { backgroundColor: color }}
+            style={isNone ? undefined : { backgroundColor: displayColor(color, theme) }}
         >
             {isNone && (
                 // a diagonal rule reads as "no fill" faster than a checkerboard
@@ -149,7 +152,7 @@ export function StylePanel({
                         key={value}
                         color={value}
                         name={name}
-                        selected={state.strokeColor === value}
+                        selected={state.strokeColor === value || (value === "#e3e7f0" && state.strokeColor === "#e3e3e8")}
                         onClick={() => setState({ strokeColor: value })}
                     />
                 ))}

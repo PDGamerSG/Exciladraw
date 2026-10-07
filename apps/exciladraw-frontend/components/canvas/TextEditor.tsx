@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useTheme } from "@/lib/theme";
+import { displayColor } from "@/draw/theme";
 import type { TextEditRequest } from "@/draw/Board";
 
 /**
@@ -18,6 +20,7 @@ export function TextEditor({
     onCommit: (value: string) => void;
     onCancel: () => void;
 }) {
+    const { theme } = useTheme();
     const ref = useRef<HTMLTextAreaElement>(null);
     const committed = useRef(false);
     const { fontSize } = request;
@@ -74,8 +77,8 @@ export function TextEditor({
                 top: request.top,
                 fontSize: `${request.fontSize}px`,
                 lineHeight: 1.25,
-                color: request.color,
-                caretColor: request.color,
+                color: displayColor(request.color, theme),
+                caretColor: displayColor(request.color, theme),
             }}
             className="pointer-events-auto absolute z-20 min-w-8 resize-none overflow-hidden whitespace-pre border-none bg-transparent p-0 font-sans outline-none"
         />

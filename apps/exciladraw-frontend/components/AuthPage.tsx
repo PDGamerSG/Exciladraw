@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { api, errorMessage, setToken } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeControl } from "@/components/ThemeControl";
 import { Wordmark } from "@/components/Wordmark";
 
 /** Only same-origin paths are followed, so ?next= cannot bounce you offsite. */
@@ -56,19 +57,18 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
 
     return (
         <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-5 py-16">
-            <div className="lamp pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[760px] -translate-x-1/2" />
-            <div className="grid-paper pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
+            <div className="absolute right-5 top-5"><ThemeControl /></div>
             <Link
                 href="/"
-                className="absolute left-4 top-4 inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100 sm:left-6 sm:top-6"
+                className="absolute left-4 top-4 inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100 sm:left-6 sm:top-6"
             >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Back to home
             </Link>
 
             <div className="rise relative w-full max-w-[380px]">
-                <div className="mb-8 flex flex-col items-center gap-5 text-center">
+                <div className="mb-8 flex flex-col items-start gap-8">
                     <Wordmark />
                     <div>
                         <h1 className="font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100">
@@ -77,14 +77,14 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                         <p className="mt-2 text-sm text-chalk-500">
                             {isSignin
                                 ? "Sign in to pick up where your team left off."
-                                : "Your first board is about thirty seconds away."}
+                                : "A place to draw, think, and work together."}
                         </p>
                     </div>
                 </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="panel flex flex-col gap-4 rounded-2xl p-6"
+                    className="flex flex-col gap-5"
                     noValidate
                 >
                     {!isSignin && (
@@ -141,7 +141,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                     {error && (
                         <p
                             role="alert"
-                            className="rounded-xl border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-destructive"
+                            className="rounded-lg border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-destructive"
                         >
                             {error}
                         </p>
@@ -150,7 +150,7 @@ export function AuthPage({ isSignin }: { isSignin: boolean }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-amber-400 text-sm font-medium text-ink-950 transition-colors duration-200 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                         {loading

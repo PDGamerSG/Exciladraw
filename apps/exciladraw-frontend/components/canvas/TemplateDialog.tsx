@@ -5,23 +5,27 @@ import { Search } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { BOARD_TEMPLATES, type BoardTemplate } from "@/draw/templates";
 import { boundsOf } from "@/draw/geometry";
-import { BOARD_BACKGROUND, drawShape } from "@/draw/render";
+import { useTheme } from "@/lib/theme";
+import { BOARD_PALETTES } from "@/draw/theme";
+import { drawShape } from "@/draw/render";
 
 function TemplatePreview({ template }: { template: BoardTemplate }) {
+    const { theme } = useTheme();
     const ref = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         const canvas = ref.current;
         const ctx = canvas?.getContext("2d");
         const bounds = boundsOf(template.shapes);
         if (!canvas || !ctx || !bounds) return;
-        ctx.fillStyle = BOARD_BACKGROUND;
+        ctx.resetTransform();
+        ctx.fillStyle = BOARD_PALETTES[theme].background;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         const scale = Math.min(560 / (bounds.maxX - bounds.minX), 220 / (bounds.maxY - bounds.minY));
         ctx.setTransform(scale, 0, 0, scale,
             300 - (bounds.minX + bounds.maxX) * scale / 2,
             130 - (bounds.minY + bounds.maxY) * scale / 2);
-        for (const shape of template.shapes) drawShape(ctx, shape);
-    }, [template]);
+        for (const shape of template.shapes) drawShape(ctx, shape, theme);
+    }, [template, theme]);
     return <canvas ref={ref} width={600} height={260} aria-hidden className="w-full rounded-lg" />;
 }
 

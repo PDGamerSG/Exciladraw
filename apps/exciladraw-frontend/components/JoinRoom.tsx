@@ -41,8 +41,6 @@ export function JoinRoom({ code }: { code: string }) {
 
     return (
         <main className="relative flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
-            <div className="lamp pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[640px] -translate-x-1/2" />
-            <div className="grid-paper pointer-events-none absolute inset-0" />
 
             <div className="relative flex flex-col items-center gap-6">
                 <Wordmark />
@@ -51,7 +49,7 @@ export function JoinRoom({ code }: { code: string }) {
                         <p className="max-w-sm text-sm leading-relaxed text-chalk-300">{error}</p>
                         <Link
                             href="/room"
-                            className="inline-flex h-10 items-center rounded-xl bg-amber-400 px-4 text-[13px] font-medium text-ink-950 transition-colors hover:bg-amber-300"
+                            className="inline-flex h-10 items-center rounded-xl bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
                         >
                             Go to your boards
                         </Link>

@@ -102,13 +102,14 @@ function Cursor({
  */
 export function HeroSheet() {
     return (
-        <figure className="sheet relative rounded-2xl border border-ink-700 bg-ink-900 p-2 shadow-[0_40px_80px_-32px_rgb(0_0_0_/_0.85)]">
-            <div className="relative overflow-hidden rounded-xl bg-board">
+        <figure className="relative overflow-hidden rounded-lg border border-ink-700 bg-ink-850">
+            <div className="flex items-center justify-between border-b border-ink-700/70 px-4 py-3 text-xs text-chalk-500"><span className="font-medium text-chalk-300">The next big idea</span><span>Shared board</span></div>
+            <div className="relative overflow-x-auto bg-board py-6 sm:py-10">
                 <div className="grid-paper pointer-events-none absolute inset-0" />
 
                 <svg
                     viewBox="0 0 800 240"
-                    className="relative block w-full"
+                    className="relative block w-full min-w-[480px]"
                     role="img"
                     aria-label="A diagram being drawn: a box labelled Idea, an arrow to a diamond labelled Ship it, an arrow to an ellipse labelled Ship, with the answer circled by hand. Two collaborators' cursors are on the board."
                 >
@@ -152,8 +153,8 @@ export function HeroSheet() {
             </div>
 
             {/* the instrument's own status line */}
-            <figcaption className="flex items-center justify-between gap-3 px-2.5 pb-0.5 pt-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-chalk-500">
-                <span>Grid 20 · Zoom 100%</span>
+            <figcaption className="flex items-center justify-between gap-3 border-t border-ink-700/70 px-4 py-3 text-xs text-chalk-500">
+                <span>Example board · Zoom 100%</span>
                 <span className="flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-pen-green" aria-hidden />
                     3 drawing

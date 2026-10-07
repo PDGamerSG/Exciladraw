@@ -67,7 +67,7 @@ export function Toolbar({
                                     "text-chalk-300 hover:bg-ink-750 hover:text-chalk-100",
                                     "[&_svg]:size-[18px] [&_svg]:shrink-0",
                                     active &&
-                                        "bg-amber-400 text-ink-950 shadow-[0_1px_8px_-1px_var(--amber-400)] hover:bg-amber-400 hover:text-ink-950"
+                                        "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
                                 )}
                             >
                                 {icon}
@@ -75,7 +75,7 @@ export function Toolbar({
                                     aria-hidden
                                     className={cn(
                                         "pointer-events-none absolute bottom-0.5 right-1 font-mono text-[9px] leading-none",
-                                        active ? "text-ink-950/55" : "text-chalk-500"
+                                        active ? "text-primary-foreground/55" : "text-chalk-500"
                                     )}
                                 >
                                     {digit}

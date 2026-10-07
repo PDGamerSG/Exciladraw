@@ -1,3 +1,4 @@
+import { BOARD_PALETTES, displayStyle, type BoardTheme } from "./theme";
 import { boundsOf, shapeBounds } from "./geometry";
 import { DEFAULT_STYLE, type Shape } from "./types";
 
@@ -12,6 +13,7 @@ function xml(value: string) {
 }
 
 export function toSvg(shapes: Shape[], options: {
+    theme?: BoardTheme;
     fontFamily?: string;
     measureText?: (text: string, size: number) => number;
 } = {}): string | null {
@@ -28,7 +30,7 @@ export function toSvg(shapes: Shape[], options: {
     const width = Math.max(1, bounds.maxX - bounds.minX + padding * 2);
     const height = Math.max(1, bounds.maxY - bounds.minY + padding * 2);
     const elements = shapes.map((shape) => {
-        const style = { ...DEFAULT_STYLE, ...shape.style };
+        const style = displayStyle({ ...DEFAULT_STYLE, ...shape.style }, options.theme ?? "dark");
         const w = Math.max(1, style.strokeWidth);
         const dash = style.strokeStyle === "dashed" ? `${w * 4} ${w * 4}` : style.strokeStyle === "dotted" ? `${w * 0.5} ${w * 3}` : "none";
         const attrs = `stroke="${xml(style.strokeColor)}" stroke-width="${style.strokeWidth}" stroke-dasharray="${dash}" stroke-linecap="round" stroke-linejoin="round" fill="${xml(style.fillColor === "transparent" ? "none" : style.fillColor)}"`;
@@ -75,5 +77,5 @@ export function toSvg(shapes: Shape[], options: {
         }
         return `<g opacity="${style.opacity / 100}">${element}</g>`;
     });
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${x} ${y} ${width} ${height}"><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#121212"/>${elements.join("")}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${x} ${y} ${width} ${height}"><rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${BOARD_PALETTES[options.theme ?? "dark"].background}"/>${elements.join("")}</svg>`;
 }

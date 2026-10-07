@@ -1,3 +1,4 @@
+import { BOARD_PALETTES, type BoardTheme } from "./theme";
 import { ShapeSchema } from "@repo/common/types";
 import { arrangeShapes, type Arrangement } from "./arrange";
 import { prepareInsertion, serializeDocument } from "./document";
@@ -6,7 +7,6 @@ import { isClipboardField, readClipboard } from "./clipboard";
 import { toSvg } from "./svg";
 import { boundsIntersect, boundsOf, hitTest, shapeBounds, translateShape } from "./geometry";
 import {
-    BOARD_BACKGROUND,
     drawCursor,
     drawGrid,
     drawMarquee,
@@ -92,6 +92,13 @@ export class Board {
     private width = 0;
     private height = 0;
     private dpr = 1;
+
+    private theme: BoardTheme = "dark";
+
+    setTheme(theme: BoardTheme) {
+        this.theme = theme;
+        this.requestRender();
+    }
 
     private tool: Tool = "select";
     private style: ShapeStyle = { ...DEFAULT_STYLE };
@@ -369,6 +376,7 @@ export class Board {
     toSvg(selectionOnly = false) {
         if (!this.loaded) throw new Error("Wait for the board to finish loading.");
         return toSvg(selectionOnly ? this.selectedShapes() : this.shapes, {
+            theme: this.theme,
             fontFamily: getComputedStyle(this.canvas).fontFamily,
             measureText: (text, size) => this.measureText(text, size),
         });
@@ -501,10 +509,10 @@ export class Board {
         const ctx = target.getContext("2d");
         if (!ctx) return null;
 
-        ctx.fillStyle = BOARD_BACKGROUND;
+        ctx.fillStyle = BOARD_PALETTES[this.theme].background;
         ctx.fillRect(0, 0, target.width, target.height);
         ctx.setTransform(scale, 0, 0, scale, -(bounds.minX - padding) * scale, -(bounds.minY - padding) * scale);
-        for (const shape of this.shapes) drawShape(ctx, shape);
+        for (const shape of this.shapes) drawShape(ctx, shape, this.theme);
 
         return new Promise((resolve) => target.toBlob(resolve, "image/png"));
     }
@@ -563,34 +571,34 @@ export class Board {
         ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
         ctx.globalAlpha = 1;
         ctx.setLineDash([]);
-        ctx.fillStyle = BOARD_BACKGROUND;
+        ctx.fillStyle = BOARD_PALETTES[this.theme].background;
         ctx.fillRect(0, 0, this.width, this.height);
 
         ctx.setTransform(scale, 0, 0, scale, camera.scrollX * this.dpr, camera.scrollY * this.dpr);
         const viewport = this.viewportBounds();
-        drawGrid(ctx, viewport, camera.zoom);
+        drawGrid(ctx, viewport, camera.zoom, this.theme);
 
         for (const shape of this.shapes) {
             // shapes far outside the viewport still cost a path to rasterise,
             // so a cheap bounds test keeps a large board scrolling smoothly
             if (!boundsIntersect(shapeBounds(shape), viewport)) continue;
-            drawShape(ctx, shape);
+            drawShape(ctx, shape, this.theme);
         }
 
         if (this.gesture.kind === "draw" && this.gesture.preview) {
-            drawShape(ctx, this.gesture.preview);
+            drawShape(ctx, this.gesture.preview, this.theme);
         }
 
         if (this.tool === "select" && this.selected.size) {
-            drawSelection(ctx, this.selectedShapes(), camera.zoom);
+            drawSelection(ctx, this.selectedShapes(), camera.zoom, this.theme);
         }
 
         if (this.gesture.kind === "marquee") {
-            drawMarquee(ctx, this.gesture.box, camera.zoom);
+            drawMarquee(ctx, this.gesture.box, camera.zoom, this.theme);
         }
 
         for (const [userId, cursor] of this.cursors) {
-            drawCursor(ctx, cursor.x, cursor.y, cursor.name, peerColor(userId), camera.zoom);
+            drawCursor(ctx, cursor.x, cursor.y, cursor.name, peerColor(userId), camera.zoom, this.theme);
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);

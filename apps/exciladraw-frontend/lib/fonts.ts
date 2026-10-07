@@ -1,20 +1,9 @@
-import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 
 /** Body and UI text. */
 export const inter = Inter({
     subsets: ["latin"],
     variable: "--font-inter",
-    display: "swap"
-});
-
-/**
- * Display face. Space Grotesk's slightly mechanical letterforms belong to the
- * same world as the drafting instruments the interface is modelled on.
- */
-export const spaceGrotesk = Space_Grotesk({
-    subsets: ["latin"],
-    weight: ["500", "600", "700"],
-    variable: "--font-space-grotesk",
     display: "swap"
 });
 
@@ -29,4 +18,4 @@ export const jetbrainsMono = JetBrains_Mono({
     display: "swap"
 });
 
-export const fontVariables = `${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`;
+export const fontVariables = `${inter.variable} ${jetbrainsMono.variable}`;

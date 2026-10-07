@@ -16,6 +16,7 @@ import { api, clearToken, errorMessage, getToken, isAuthError } from "@/lib/api"
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { ShareDialog } from "@/components/canvas/ShareDialog";
+import { ThemeControl } from "@/components/ThemeControl";
 import { Wordmark } from "@/components/Wordmark";
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -108,33 +109,35 @@ export function RoomList() {
     return (
         <TooltipProvider delayDuration={400}>
             <div className="relative min-h-screen">
-                <div className="lamp pointer-events-none absolute -top-44 left-1/2 h-[460px] w-[760px] -translate-x-1/2" />
-                <div className="grid-paper pointer-events-none absolute inset-x-0 top-0 h-[600px] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
 
-                <div className="relative mx-auto w-full max-w-3xl px-5 py-6 sm:px-8">
-                    <header className="flex items-center justify-between">
+                <div className="relative mx-auto w-full max-w-4xl px-5 py-6 sm:px-8">
+                    <header className="flex items-center justify-between border-b border-ink-700/70 pb-6">
                         <Wordmark />
-                        <button
-                            type="button"
-                            onClick={signOut}
-                            className="inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100"
-                        >
-                            <LogOut className="h-3.5 w-3.5" />
-                            Sign out
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <ThemeControl />
+                            <button
+                                type="button"
+                                onClick={signOut}
+                                className="inline-flex h-9 items-center gap-2 rounded-lg px-3 text-[13px] text-chalk-500 transition-colors duration-200 hover:bg-ink-850 hover:text-chalk-100"
+                            >
+                                <LogOut className="h-3.5 w-3.5" />
+                                Sign out
+                            </button>
+                        </div>
                     </header>
 
                     <section className="rise mt-14">
-                        <p className="eyebrow">Your boards</p>
                         <h1 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight text-chalk-100 sm:text-3xl">
-                            Name a board and start drawing.
+                            Your boards
                         </h1>
+
+                        <p className="mt-3 text-sm text-chalk-500">Pick up an idea, or make room for a new one.</p>
 
                         <form onSubmit={createRoom} className="mt-6 flex flex-col gap-2.5 sm:flex-row">
                             <Input
                                 type="text"
                                 aria-label="Board name"
-                                placeholder="Q3 architecture"
+                                placeholder="Name your new board"
                                 value={roomName}
                                 onChange={(e) => setRoomName(e.target.value)}
                                 minLength={3}
@@ -143,7 +146,7 @@ export function RoomList() {
                             <button
                                 type="submit"
                                 disabled={creating || roomName.trim().length < 3}
-                                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 text-sm font-medium text-ink-950 transition-colors duration-200 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {creating ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -153,14 +156,14 @@ export function RoomList() {
                                 Create board
                             </button>
                         </form>
-                        <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] text-chalk-500">
+                        <p className="mt-2 text-xs text-chalk-500">
                             3–20 characters · names are unique
                         </p>
 
                         {error && (
                             <p
                                 role="alert"
-                                className="mt-4 rounded-xl border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] text-destructive"
+                                className="mt-4 rounded-lg border border-destructive/25 bg-destructive/10 px-3.5 py-2.5 text-[13px] text-destructive"
                             >
                                 {error}
                             </p>
@@ -169,12 +172,12 @@ export function RoomList() {
 
                     <section className="mt-10 pb-16" aria-label="Boards you can open">
                         {loading ? (
-                            <div className="flex items-center gap-3 rounded-2xl border border-ink-800 px-4 py-6 text-[13px] text-chalk-500">
+                            <div className="flex items-center gap-3 rounded-lg border border-ink-800 px-4 py-6 text-[13px] text-chalk-500">
                                 <Loader2 className="h-4 w-4 animate-spin" />
                                 Loading your boards…
                             </div>
                         ) : rooms.length === 0 ? (
-                            <div className="sheet flex flex-col items-center gap-3 rounded-2xl border border-dashed border-ink-700 px-6 py-14 text-center">
+                            <div className="flex flex-col items-center gap-3 rounded-lg border border-ink-700 px-6 py-14 text-center">
                                 <PenLine className="h-5 w-5 text-chalk-500" aria-hidden />
                                 <p className="max-w-xs text-[13px] leading-relaxed text-chalk-500">
                                     Nothing here yet. Name a board above and it opens straight onto
@@ -182,25 +185,25 @@ export function RoomList() {
                                 </p>
                             </div>
                         ) : (
-                            <ul className="flex flex-col gap-2">
+                            <ul className="divide-y divide-ink-700/70 border-y border-ink-700/70">
                                 {rooms.map((room) => (
                                     <li
                                         key={room.id}
-                                        className="group flex items-center gap-2 rounded-2xl border border-ink-800 bg-ink-900 pr-2 transition-colors duration-200 hover:border-ink-700"
+                                        className="group flex items-center gap-2 pr-2 transition-colors duration-200 hover:bg-ink-900"
                                     >
                                         <button
                                             type="button"
                                             onClick={() => router.push(`/canvas/${room.id}`)}
-                                            className="flex min-w-0 flex-1 items-center gap-3.5 rounded-2xl px-4 py-3.5 text-left"
+                                            className="flex min-w-0 flex-1 items-center gap-3.5 rounded-lg px-4 py-3.5 text-left"
                                         >
-                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-ink-700 bg-ink-850 font-mono text-[11px] text-chalk-500">
-                                                {room.id}
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-ink-700 bg-ink-850 font-mono text-[11px] text-chalk-500">
+                                                <PenLine className="h-4 w-4" aria-hidden />
                                             </span>
                                             <span className="min-w-0 flex-1">
                                                 <span className="block truncate text-sm font-medium text-chalk-100">
                                                     {room.slug}
                                                 </span>
-                                                <span className="mt-0.5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-chalk-500">
+                                                <span className="mt-0.5 flex items-center gap-2 flex-wrap text-xs text-chalk-500">
                                                     <Users className="h-3 w-3" aria-hidden />
                                                     {plural(room.memberCount, "member", "members")}
                                                     <span aria-hidden>·</span>
@@ -282,7 +285,7 @@ export function RoomList() {
                         <button
                             type="button"
                             onClick={() => setConfirming(null)}
-                            className="inline-flex h-10 items-center rounded-xl px-4 text-[13px] text-chalk-300 transition-colors hover:bg-ink-800 hover:text-chalk-100"
+                            className="inline-flex h-10 items-center rounded-lg px-4 text-[13px] text-chalk-300 transition-colors hover:bg-ink-800 hover:text-chalk-100"
                         >
                             Cancel
                         </button>
@@ -290,7 +293,7 @@ export function RoomList() {
                             type="button"
                             disabled={removing}
                             onClick={() => confirming && removeRoom(confirming)}
-                            className="inline-flex h-10 items-center gap-2 rounded-xl bg-destructive px-4 text-[13px] font-medium text-ink-950 transition-colors hover:opacity-90 disabled:opacity-60"
+                            className="inline-flex h-10 items-center gap-2 rounded-lg bg-destructive text-destructive-foreground px-4 text-[13px] font-medium transition-colors hover:opacity-90 disabled:opacity-60"
                         >
                             {removing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                             {confirming?.isAdmin ? "Delete board" : "Leave board"}

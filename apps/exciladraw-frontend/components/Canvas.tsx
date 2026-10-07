@@ -20,6 +20,9 @@ import { ArrangePanel } from "./canvas/ArrangePanel";
 import { MAX_DOCUMENT_BYTES, parseDocument } from "@/draw/document";
 import type { BoardTemplate } from "@/draw/templates";
 
+import { useTheme } from "@/lib/theme";
+import { ThemeControl } from "./ThemeControl";
+
 export type { Tool };
 
 const KEY_TO_TOOL: Record<string, Tool> = {
@@ -57,6 +60,7 @@ export function Canvas({
     inviteCode?: string;
 }) {
     const router = useRouter();
+    const { theme } = useTheme();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const boardRef = useRef<Board | null>(null);
     const importRef = useRef<HTMLInputElement>(null);
@@ -115,6 +119,10 @@ export function Canvas({
     useEffect(() => {
         boardRef.current?.setTool(selectedTool);
     }, [selectedTool]);
+
+    useEffect(() => {
+        boardRef.current?.setTheme(theme);
+    }, [theme, roomId, socket]);
 
     const updateStyle = useCallback((patch: Partial<PanelState>) => {
         setStyle((prev) => ({ ...prev, ...patch }));
@@ -253,7 +261,7 @@ export function Canvas({
 
     return (
         <TooltipProvider delayDuration={400}>
-            <div className="dark relative h-screen w-screen overflow-hidden bg-board">
+            <div className="relative h-screen w-screen overflow-hidden bg-board">
                 <canvas
                     ref={canvasRef}
                     aria-label={roomName ? `Drawing board: ${roomName}` : "Drawing board"}
@@ -270,10 +278,10 @@ export function Canvas({
                 {ready && shapeCount === 0 && selectedTool === "select" && !textEdit && (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
                         <div className="max-w-sm text-center">
-                            <h1 className="font-display text-xl font-medium text-chalk-100">Give your idea a starting point</h1>
-                            <p className="mt-2 text-sm leading-relaxed text-chalk-300">Draw something from scratch, or start with an editable diagram.</p>
+                            <h1 className="font-display text-xl font-medium text-chalk-100">A little room to think.</h1>
+                            <p className="mt-2 text-sm leading-relaxed text-chalk-300">Pick a tool above, or give your board a head start with a template.</p>
                             <button type="button" onClick={() => setTemplatesOpen(true)}
-                                className="pointer-events-auto mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-amber-400 px-4 text-sm font-medium text-ink-950 hover:bg-amber-300">
+                                className="pointer-events-auto mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary-hover">
                                 <LayoutTemplate className="h-4 w-4" /> Browse templates
                             </button>
                             <p className="mt-3 text-xs text-chalk-500">Flowcharts, project boards, architecture & workshops</p>
@@ -322,19 +330,20 @@ export function Canvas({
                         canClear={shapeCount > 0}
                     />
 
-                    <div className="absolute left-1/2 top-12 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 overflow-x-auto sm:top-0 sm:max-w-none">
+                    <div className="absolute left-1/2 top-12 max-w-[calc(100vw-1.5rem)] -translate-x-1/2 overflow-x-auto lg:top-0 lg:max-w-none">
                         <Toolbar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Presence peers={peers} />
+                        <ThemeControl />
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <button
                                     type="button"
                                     aria-label="Share board"
                                     onClick={() => setShareOpen(true)}
-                                    className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-xl bg-amber-400 px-3.5 text-[13px] font-medium text-ink-950 shadow-[0_1px_12px_-2px_var(--amber-400)] transition-colors duration-150 hover:bg-amber-300"
+                                    className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-xl bg-primary px-3.5 text-[13px] font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary-hover"
                                 >
                                     <Share2 className="h-3.5 w-3.5" />
                                     <span className="hidden sm:inline">Share</span>
@@ -348,7 +357,7 @@ export function Canvas({
                 {/* The style panel sits under the board controls, out of the way
                     of the drawing area but always reachable. */}
                 {showStylePanel && (
-                    <div className="pointer-events-none fixed left-3 top-28 max-h-[calc(100dvh-12rem)] overflow-y-auto sm:left-4 sm:top-[4.25rem] sm:max-h-[calc(100dvh-9rem)]">
+                    <div className="pointer-events-none fixed left-3 top-28 max-h-[calc(100dvh-12rem)] overflow-y-auto sm:left-4 lg:top-[4.25rem] sm:max-h-[calc(100dvh-9rem)]">
                         <StylePanel
                             state={style}
                             setState={updateStyle}

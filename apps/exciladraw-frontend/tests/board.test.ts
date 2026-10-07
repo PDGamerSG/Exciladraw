@@ -57,6 +57,15 @@ test("board inserts, syncs, arranges and undoes a large diagram as whole operati
         assert.equal(parseDocument(board.toDocument(true)).length, 401);
         relay();
         const inserted = board.toDocument();
+        const cameraBeforeTheme = board.getCamera();
+        board.setTheme("light");
+        assert.equal(board.toDocument(), inserted, "appearance must not rewrite saved shapes");
+        assert.equal(parseDocument(board.toDocument(true)).length, 401, "selection survives appearance changes");
+        assert.deepEqual(board.getCamera(), cameraBeforeTheme);
+        assert.equal(socket.sent.length, 0, "appearance is local to each collaborator");
+        assert.match(board.toSvg()!, /fill="#faf9f6"/);
+        board.setTheme("dark");
+        assert.match(board.toSvg()!, /fill="#181a1b"/);
         board.arrangeSelection("top");
         assert.equal(socket.sent.length, 3, "large updates are split into protocol-sized frames");
         relay();

@@ -2,6 +2,8 @@
 
 import type { Peer } from "@/draw/Board";
 import { peerColor } from "@/draw/render";
+import { displayColor } from "@/draw/theme";
+import { useTheme } from "@/lib/theme";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 function initials(name: string) {
@@ -15,6 +17,7 @@ const MAX_SHOWN = 4;
 
 /** Who else is on the board right now, coloured to match their cursor. */
 export function Presence({ peers }: { peers: Peer[] }) {
+    const { theme } = useTheme();
     if (peers.length <= 1) return null;
 
     const shown = peers.slice(0, MAX_SHOWN);
@@ -32,8 +35,8 @@ export function Presence({ peers }: { peers: Peer[] }) {
                     <Tooltip key={peer.userId}>
                         <TooltipTrigger asChild>
                             <span
-                                className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink-850 font-mono text-[9px] font-medium text-ink-950"
-                                style={{ backgroundColor: peerColor(peer.userId) }}
+                                className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink-850 font-mono text-[9px] font-medium text-primary-foreground"
+                                style={{ backgroundColor: displayColor(peerColor(peer.userId), theme) }}
                             >
                                 {initials(peer.name)}
                             </span>

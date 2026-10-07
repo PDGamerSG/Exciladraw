@@ -112,7 +112,7 @@ export function RoomCanvas({ roomId }: { roomId: string }) {
                                     setError("");
                                     setAttempt(0);
                                 }}
-                                className="inline-flex h-9 items-center rounded-xl bg-amber-400 px-4 text-[13px] font-medium text-ink-950 transition-colors hover:bg-amber-300"
+                                className="inline-flex h-9 items-center rounded-xl bg-primary px-4 text-[13px] font-medium text-primary-foreground transition-colors hover:bg-primary-hover"
                             >
                                 Try again
                             </button>

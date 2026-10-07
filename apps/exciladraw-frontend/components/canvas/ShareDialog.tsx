@@ -77,8 +77,8 @@ export function ShareDialog({
                             className={cn(
                                 "inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium transition-colors duration-200",
                                 copied
-                                    ? "bg-pen-green text-ink-950"
-                                    : "bg-amber-400 text-ink-950 hover:bg-amber-300"
+                                    ? "bg-pen-green text-primary-foreground"
+                                    : "bg-primary text-primary-foreground hover:bg-primary-hover"
                             )}
                         >
                             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
